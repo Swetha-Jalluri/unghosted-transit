@@ -57,19 +57,17 @@ def fetch_and_cache_stops(config: Optional[dict] = None) -> dict[str, dict]:
         if api_key:
             headers["x-api-key"] = api_key
         
-        # Use filter to fetch only needed stops; fall back to all stops if no demo_stops
+        # Use filter to fetch only needed stops
         if demo_stops:
             stop_ids_filter = ",".join(demo_stops)
             params = {
                 "filter[id]": stop_ids_filter,
-                "fields[stop]": "id,name,latitude,longitude",
-                "limit": len(demo_stops) + 10,  # Small buffer
+                "fields[stop]": "name,latitude,longitude",
             }
         else:
             params = {
                 "fields[stop]": "id,name,latitude,longitude,route_ids",
                 "include": "routes",
-                "limit": 1000,
             }
         
         response = requests.get(stops_url, headers=headers, params=params, timeout=10)

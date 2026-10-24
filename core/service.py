@@ -113,7 +113,7 @@ def get_bus_trust(
     """Get bus trust predictions for a stop.
     
     Args:
-        stop_id: Stop ID (demo mode: from config.demo_stops).
+        stop_id: Stop ID (any stop that has predictions in the latest poll).
         mode: "live" (current feeds), "demo" (sample.db or mocks), "replay" (mock timeline).
         limit: Max predictions to return.
         at_ts: Replay timestamp (POSIX seconds).
@@ -122,24 +122,11 @@ def get_bus_trust(
         BusTrustResponse with predictions, hidden_count, and metadata.
     
     Raises:
-        NotFound: If stop_id not found or data unavailable.
+        NotFound: If stop_id has no predictions in latest poll.
         LiveDataUnavailable: If live mode and feeds fail.
     """
-    # Validate stop exists
-    stops = list_demo_stops()
-    stop_dict = {s.stop_id: s for s in stops}
-    if stop_id not in stop_dict:
-        raise NotFound(f"Stop {stop_id} not found")
-    
-    stop_name = stop_dict[stop_id].name
-    generated_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-    data_age_sec = {}
-    
     # Demo mode: read latest snapshot from raw.db or fall back to mocks
     if mode == "demo":
-        predictions = []
-        hidden_count = 0
-        
         # Try to read from raw.db first
         if RAW_DB.exists():
             try:
@@ -153,12 +140,26 @@ def get_bus_trust(
                 latest_poll = cursor.fetchone()
                 if latest_poll:
                     poll_ts = latest_poll["ts"]
+                    data_age_sec = {}
                     if latest_poll["data_age_trip_updates"] is not None:
                         data_age_sec["trip_updates"] = latest_poll["data_age_trip_updates"]
                     if latest_poll["data_age_vehicle_positions"] is not None:
                         data_age_sec["vehicle_positions"] = latest_poll["data_age_vehicle_positions"]
                 else:
                     poll_ts = None
+                    data_age_sec = {}
+                
+                # Get stop name from static_load or use stop_id as fallback
+                try:
+                    from core.static_load import get_stops
+                    stops_dict = get_stops()
+                    stop_name = stops_dict.get(stop_id, {}).get("name")
+                except Exception:
+                    stops_dict = {}
+                    stop_name = None
+                
+                if not stop_name:
+                    stop_name = stop_id
                 
                 # Get latest predictions for this stop with all vehicle data
                 # First get predictions with vehicle_id from trip updates if available
@@ -182,6 +183,9 @@ def get_bus_trust(
                 if rows:
                     # Predictions already deduplicated by query (one per trip from latest poll)
                     predictions_data = rows
+                    
+                    predictions = []
+                    hidden_count = 0
                     
                     # Score each prediction
                     for row in predictions_data[:limit * 2]:  # Get more to filter hidden
@@ -260,6 +264,7 @@ def get_bus_trust(
                     predictions = predictions[:limit]
                     
                     if predictions:
+                        generated_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
                         response = BusTrustResponse(
                             stop_id=stop_id,
                             stop_name=stop_name,
@@ -272,6 +277,9 @@ def get_bus_trust(
                             disclaimer=DISCLAIMER,
                         )
                         return response
+                    else:
+                        # No predictions found for this stop
+                        raise NotFound(f"No predictions for stop {stop_id}")
             
             except (sqlite3.Error, Exception):
                 # Fall through to mocks if db read fails
@@ -300,10 +308,20 @@ def get_bus_trust(
             for snapshot in timeline:
                 if snapshot.get("ts") == at_ts and snapshot.get("stop_id") == stop_id:
                     predictions = [BusPrediction(**p) for p in snapshot.get("predictions", [])]
+                    generated_at = datetime.fromtimestamp(at_ts, tz=timezone.utc).isoformat().replace("+00:00", "Z")
+                    # Get stop name for replay
+                    try:
+                        from core.static_load import get_stops
+                        stops_dict = get_stops()
+                        stop_name = stops_dict.get(stop_id, {}).get("name")
+                    except Exception:
+                        stop_name = None
+                    if not stop_name:
+                        stop_name = stop_id
                     response = BusTrustResponse(
                         stop_id=stop_id,
                         stop_name=stop_name,
-                        generated_at=datetime.fromtimestamp(at_ts, tz=timezone.utc).isoformat().replace("+00:00", "Z"),
+                        generated_at=generated_at,
                         mode=mode,
                         data_age_sec={},
                         predictions=predictions[:limit],
