@@ -1,0 +1,15 @@
+[theme]
+# Futuristic dark editorial theme for Unghosted
+base = "dark"
+primaryColor = "#007BA7"            # Cerulean Blue accent
+backgroundColor = "#0A0A0A"         # Jet Black
+secondaryBackgroundColor = "#141416"
+textColor = "#ECECEC"               # off-white body text
+font = "sans serif"
+
+[server]
+headless = true
+
+[browser]
+# No usage statistics / analytics
+gatherUsageStats = false

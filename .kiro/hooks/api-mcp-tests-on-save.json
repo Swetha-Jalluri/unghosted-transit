@@ -1,0 +1,24 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "API/MCP tests on save",
+      "trigger": "PostFileSave",
+      "matcher": "(api|mcp_server|tests[\\\\/]api|tests[\\\\/]mcp)[\\\\/].*\\.py$",
+      "action": {
+        "type": "command",
+        "command": "uv run pytest -q tests/api tests/mcp",
+        "timeout": 300
+      }
+    },
+    {
+      "name": "API/MCP test failure triage",
+      "trigger": "PostFileSave",
+      "matcher": "(api|mcp_server|tests[\\\\/]api|tests[\\\\/]mcp)[\\\\/].*\\.py$",
+      "action": {
+        "type": "agent",
+        "prompt": "The command hook 'API/MCP tests on save' just ran `uv run pytest -q tests/api tests/mcp` after a save under api/, mcp_server/, tests/api/ or tests/mcp/. Check its output. If every test passed, say nothing and do nothing. If anything failed: (1) summarize each failing test by name, what it asserted, and the actual vs expected result; (2) propose the minimal fix to the implementation that makes it pass. Do NOT weaken, skip, loosen, or delete tests, and do NOT change assertions or thresholds to accommodate a bug. The tests are the guardrails. Respect file ownership: tests/api and tests/mcp and api/ and mcp_server/ are owner B's; core/ and contracts are owner A's. If the fix requires changing a contract name or core behavior owned by A, do not edit it; flag it to the user instead. Only propose the change and wait for confirmation before editing."
+      }
+    }
+  ]
+}

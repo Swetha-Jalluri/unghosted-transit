@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Sync README API and MCP tools sections",
+      "trigger": "PostFileSave",
+      "description": "When a .py file under api/ or mcp_server/ is saved, update only the \"API\" and \"MCP tools\" sections of README.md to reflect the current endpoints, tools, and an example response.",
+      "matcher": "(api|mcp_server)[\\\\/].*\\.py$",
+      "action": {
+        "type": "agent",
+        "prompt": "A Python file under api/ or mcp_server/ was just saved. Update README.md so its \"API\" and \"MCP tools\" sections reflect the current code.\n\nScope and rules:\n- Read the FastAPI app under api/ (routes, methods, paths, the /v1 prefix) and the FastMCP server under mcp_server/ (registered tools and their signatures). Base everything on the code as it exists now; do not invent endpoints or tools.\n- Edit ONLY two sections of README.md:\n  1. A section titled \"## API\" — list each HTTP endpoint (method + path) with a one-line description, and include one realistic example response (a JSON body from the contract, e.g. a BusTrustResponse or Health payload). Keep the example short.\n  2. A section titled \"## MCP tools\" — list each MCP tool name with its parameters and a one-line description.\n- If either section does not exist in README.md yet, create it by appending it to the end of the file. If it exists, replace only that section's body (everything from its \"## \" heading up to, but not including, the next \"## \" heading or end of file).\n- NEVER modify any other part of README.md (title, tagline, or any other section). Preserve all surrounding content, headings, and ordering exactly.\n- If api/ or mcp_server/ currently define no endpoints or tools, write \"None yet.\" as that section's body rather than removing the section.\n- Do not run commands or edit any file other than README.md."
+      }
+    }
+  ]
+}
