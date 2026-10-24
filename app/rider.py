@@ -38,10 +38,11 @@ def _age_text(data_age_sec: dict, key: str) -> str:
 
 def _stop_options() -> list:
     """Load demo stops; return an empty list if the Service call fails."""
-    result = calls.call(service.list_demo_stops, mode="demo")
-    if result.ok and result.value:
-        return list(result.value)
-    return []
+    try:
+        stops = service.list_demo_stops()
+        return list(stops) if stops else []
+    except Exception:
+        return []
 
 
 def render() -> None:
