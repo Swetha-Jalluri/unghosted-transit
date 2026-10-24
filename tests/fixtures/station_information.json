@@ -1,0 +1,964 @@
+{
+  "data": {
+    "stations": [
+      {
+        "station_id": "8e7c1984-dc81-43b0-a0d3-58c6de45225a",
+        "name": "Broadway at Grafton St",
+        "short_name": "L32004",
+        "lon": -71.14009319811885,
+        "lat": 42.40994213011757,
+        "region_id": "128",
+        "capacity": 11,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "465",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "8e7c1984-dc81-43b0-a0d3-58c6de45225a",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "6eaa7343-402d-41c9-9aac-8c664fdbdcf1",
+        "name": "Salem MBTA - Lower Level",
+        "short_name": "T32012",
+        "lon": -70.89684,
+        "lat": 42.523994,
+        "capacity": 11,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "6eaa7343-402d-41c9-9aac-8c664fdbdcf1",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "6eaa7343-402d-41c9-9aac-8c664fdbdcf1",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "768433a9-fc30-4485-b136-22d6f8a96f1c",
+        "name": "Auburn St. at Mystic River",
+        "short_name": "ZZ32996",
+        "lon": -71.12608127863496,
+        "lat": 42.41759089672136,
+        "capacity": 11,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "768433a9-fc30-4485-b136-22d6f8a96f1c",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "768433a9-fc30-4485-b136-22d6f8a96f1c",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "2089808297152151688",
+        "name": "Mass Ave at Alewife Greenway",
+        "short_name": "L320013",
+        "lon": -71.13655772883486,
+        "lat": 42.401364806487635,
+        "region_id": "128",
+        "capacity": 12,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "2089808297152151688",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": false,
+        "station_type": "classic",
+        "external_id": "2089808297152151688",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "133d159e-a202-4310-910f-eca392fe181e",
+        "name": "75 Binney St",
+        "short_name": "M32064",
+        "lon": -71.0801375997653,
+        "lat": 42.36550728505653,
+        "region_id": "8",
+        "capacity": 19,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "398",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "133d159e-a202-4310-910f-eca392fe181e",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "f8346c96-0de8-11e7-991c-3863bb43a7d0",
+        "name": "HMS/HSPH - Avenue Louis Pasteur at Longwood Ave",
+        "short_name": "B32003",
+        "lon": -71.10286116600037,
+        "lat": 42.3374174845973,
+        "region_id": "10",
+        "capacity": 25,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "14",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "f8346c96-0de8-11e7-991c-3863bb43a7d0",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "57f5003b-6574-40b3-83d7-3b5dee1472e0",
+        "name": "Shetland Park - Congress at Peabody St",
+        "short_name": "T32003",
+        "lon": -70.88952362537384,
+        "lat": 42.51836788262243,
+        "capacity": 11,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "518",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "57f5003b-6574-40b3-83d7-3b5dee1472e0",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "f83466c6-0de8-11e7-991c-3863bb43a7d0",
+        "name": "Cambridge St at Joy St",
+        "short_name": "D32000",
+        "lon": -71.06528744101524,
+        "lat": 42.36125721646537,
+        "region_id": "10",
+        "capacity": 14,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "6",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "f83466c6-0de8-11e7-991c-3863bb43a7d0",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "f8350d30-0de8-11e7-991c-3863bb43a7d0",
+        "name": "The Lawn on D",
+        "short_name": "C32028",
+        "lon": -71.044024,
+        "lat": 42.344792,
+        "region_id": "10",
+        "capacity": 19,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "163",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "f8350d30-0de8-11e7-991c-3863bb43a7d0",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "2149920539832638004",
+        "name": "Craigie St at Brattle St/Sparks St",
+        "short_name": "M32096",
+        "lon": -71.1300602747914,
+        "lat": 42.377923377417865,
+        "region_id": "8",
+        "capacity": 15,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "2149920539832638004",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "2149920539832638004",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "25489822-e43a-4704-b2a8-d905b78ba77c",
+        "name": "Everett Square (Broadway at Norwood St)",
+        "short_name": "V32003",
+        "lon": -71.055356,
+        "lat": 42.407381,
+        "region_id": "104",
+        "capacity": 14,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "389",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "25489822-e43a-4704-b2a8-d905b78ba77c",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "f8347ba8-0de8-11e7-991c-3863bb43a7d0",
+        "name": "Seaport Hotel - Congress St at Seaport Ln",
+        "short_name": "B32014",
+        "lon": -71.04217991144988,
+        "lat": 42.34898004239155,
+        "region_id": "10",
+        "capacity": 19,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "31",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "f8347ba8-0de8-11e7-991c-3863bb43a7d0",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "f8346e51-0de8-11e7-991c-3863bb43a7d0",
+        "name": "Soldiers Field Park - 111 Western Ave",
+        "short_name": "A32006",
+        "lon": -71.1182756971175,
+        "lat": 42.364263440638524,
+        "region_id": "10",
+        "capacity": 15,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "17",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "f8346e51-0de8-11e7-991c-3863bb43a7d0",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "f834a67b-0de8-11e7-991c-3863bb43a7d0",
+        "name": "Harvard Law School at Mass Ave / Jarvis St",
+        "short_name": "M32020",
+        "lon": -71.119902,
+        "lat": 42.378352,
+        "region_id": "8",
+        "capacity": 19,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "89",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "f834a67b-0de8-11e7-991c-3863bb43a7d0",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "f834b928-0de8-11e7-991c-3863bb43a7d0",
+        "name": "Dudley Town Common - Mt Pleasant Ave at Blue Hill Ave",
+        "short_name": "C32015",
+        "lon": -71.075354,
+        "lat": 42.325333,
+        "region_id": "10",
+        "capacity": 15,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "106",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "f834b928-0de8-11e7-991c-3863bb43a7d0",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "f83493c0-0de8-11e7-991c-3863bb43a7d0",
+        "name": "MIT at Mass Ave / Amherst St",
+        "short_name": "M32006",
+        "lon": -71.0932723,
+        "lat": 42.3583056,
+        "region_id": "8",
+        "capacity": 31,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "67",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "f83493c0-0de8-11e7-991c-3863bb43a7d0",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "625f105e-4407-4988-9095-d1979cbda5e1",
+        "name": "Broadway at Central St",
+        "short_name": "S32016",
+        "lon": -71.09850591982195,
+        "lat": 42.39517150121575,
+        "region_id": "9",
+        "capacity": 19,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "234",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "625f105e-4407-4988-9095-d1979cbda5e1",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "2251186911126913182",
+        "name": "99 Harvard St",
+        "short_name": "C82345",
+        "lon": -71.120917,
+        "lat": 42.336389,
+        "region_id": "4",
+        "capacity": 19,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "2251186911126913182",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": false,
+        "station_type": "classic",
+        "external_id": "2251186911126913182",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "1976280681456741062",
+        "name": "Carr Park",
+        "short_name": "F32011",
+        "lon": -71.094755,
+        "lat": 42.434365,
+        "capacity": 11,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "1976280681456741062",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "1976280681456741062",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "e519df41-c4d7-403a-9afa-a5dd7cdd2d03",
+        "name": "Clinton St at North St",
+        "short_name": "D32057",
+        "lon": -71.05524927377701,
+        "lat": 42.3607028354884,
+        "region_id": "10",
+        "capacity": 18,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "536",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "e519df41-c4d7-403a-9afa-a5dd7cdd2d03",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "8d535c23-f186-4161-aa10-17e94be6d4ae",
+        "name": "Maverick St at Massport Path",
+        "short_name": "A32044",
+        "lon": -71.0333597474255,
+        "lat": 42.36774122306014,
+        "region_id": "10",
+        "capacity": 15,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "436",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "8d535c23-f186-4161-aa10-17e94be6d4ae",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "ec4e1168-25dc-4929-b17b-e4ae578dd888",
+        "name": "The Dimock Center",
+        "short_name": "E32011",
+        "lon": -71.09639923859504,
+        "lat": 42.3193094317828,
+        "region_id": "10",
+        "capacity": 16,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "425",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "ec4e1168-25dc-4929-b17b-e4ae578dd888",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "f8351649-0de8-11e7-991c-3863bb43a7d0",
+        "name": "Alewife MBTA at Steel Place",
+        "short_name": "M32046",
+        "lon": -71.14260613918304,
+        "lat": 42.395588457167094,
+        "region_id": "8",
+        "capacity": 19,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "183",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "f8351649-0de8-11e7-991c-3863bb43a7d0",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "f83473ea-0de8-11e7-991c-3863bb43a7d0",
+        "name": "Roxbury Crossing T Stop - Columbus Ave at Tremont St",
+        "short_name": "C32001",
+        "lon": -71.095171,
+        "lat": 42.331184,
+        "region_id": "10",
+        "capacity": 23,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "27",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "f83473ea-0de8-11e7-991c-3863bb43a7d0",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "2132460331327742574",
+        "name": "Congress St at Boston Wharf Rd",
+        "short_name": "B32092",
+        "lon": -71.046713,
+        "lat": 42.34951487,
+        "region_id": "10",
+        "capacity": 19,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "2132460331327742574",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "2132460331327742574",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "1986694622707704150",
+        "name": "Watertown St at 5th Ave",
+        "short_name": "W32010",
+        "lon": -71.19127,
+        "lat": 42.36289,
+        "region_id": "125",
+        "capacity": 19,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "1986694622707704150",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "1986694622707704150",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "2220033166406469278",
+        "name": "Alabama St at Messinger St",
+        "short_name": "C33086",
+        "lon": -71.10280577,
+        "lat": 42.275499,
+        "region_id": "10",
+        "capacity": 15,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "2220033166406469278",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": false,
+        "station_type": "classic",
+        "external_id": "2220033166406469278",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "5d17f129-af8c-4f30-bc58-6a8279052772",
+        "name": "American Legion Hwy at Hyde Park Ave",
+        "short_name": "C32101",
+        "lon": -71.119903922081,
+        "lat": 42.27265394101898,
+        "region_id": "10",
+        "capacity": 19,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "543",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "5d17f129-af8c-4f30-bc58-6a8279052772",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "f834fcbe-0de8-11e7-991c-3863bb43a7d0",
+        "name": "Kendall Street",
+        "short_name": "M32032",
+        "lon": -71.08217630535651,
+        "lat": 42.363557928857844,
+        "region_id": "8",
+        "capacity": 15,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "141",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "f834fcbe-0de8-11e7-991c-3863bb43a7d0",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "2031175112202687108",
+        "name": "Charles St S at Stuart St",
+        "short_name": "D32025",
+        "lon": -71.06669444,
+        "lat": 42.35077778,
+        "region_id": "10",
+        "capacity": 16,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "2031175112202687108",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": false,
+        "station_type": "classic",
+        "external_id": "2031175112202687108",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "f8347a8b-0de8-11e7-991c-3863bb43a7d0",
+        "name": "Innovation Lab - 125 Western Ave at Batten Way",
+        "short_name": "A32011",
+        "lon": -71.12459778785706,
+        "lat": 42.36371276003581,
+        "region_id": "10",
+        "capacity": 19,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "29",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "f8347a8b-0de8-11e7-991c-3863bb43a7d0",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "87b5a8b7-a330-4c51-ab32-7dafa292c88f",
+        "name": "Northbourne Rd at Hyde Park Ave",
+        "short_name": "C32078",
+        "lon": -71.117736660035,
+        "lat": 42.29118034790426,
+        "region_id": "10",
+        "capacity": 19,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "421",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "87b5a8b7-a330-4c51-ab32-7dafa292c88f",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "f8348598-0de8-11e7-991c-3863bb43a7d0",
+        "name": "Stuart St at Charles St",
+        "short_name": "D32011",
+        "lon": -71.066289,
+        "lat": 42.351146,
+        "region_id": "10",
+        "capacity": 18,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "49",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": false,
+        "station_type": "classic",
+        "external_id": "f8348598-0de8-11e7-991c-3863bb43a7d0",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "01d29f8c-768d-4c4f-84ca-3de966075287",
+        "name": "Bacon St at Washington St",
+        "short_name": "N32003",
+        "lon": -71.1860453666327,
+        "lat": 42.35711920909866,
+        "region_id": "127",
+        "capacity": 11,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "469",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "01d29f8c-768d-4c4f-84ca-3de966075287",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "2127634714741013228",
+        "name": "Vassal Lane at Tobin VLUS",
+        "short_name": "M32015",
+        "lon": -71.140329,
+        "lat": 42.384233,
+        "region_id": "8",
+        "capacity": 24,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "2127634714741013228",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "2127634714741013228",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "a825b55d-3ab3-481f-9c50-d3a7313e6843",
+        "name": "One Memorial Drive",
+        "short_name": "M32053",
+        "lon": -71.08029352270573,
+        "lat": 42.36166313878279,
+        "region_id": "8",
+        "capacity": 19,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "228",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "a825b55d-3ab3-481f-9c50-d3a7313e6843",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "f8347ded-0de8-11e7-991c-3863bb43a7d0",
+        "name": "Arch St at Franklin St",
+        "short_name": "D32004",
+        "lon": -71.0582291708306,
+        "lat": 42.355335019412564,
+        "region_id": "10",
+        "capacity": 31,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "35",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "f8347ded-0de8-11e7-991c-3863bb43a7d0",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "f834c6f5-0de8-11e7-991c-3863bb43a7d0",
+        "name": "Packard Ave at Powderhouse Blvd",
+        "short_name": "S32009",
+        "lon": -71.123413,
+        "lat": 42.40449,
+        "region_id": "9",
+        "capacity": 15,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "111",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "f834c6f5-0de8-11e7-991c-3863bb43a7d0",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "aefc33cd-40b9-48da-8b87-415428816bdb",
+        "name": "Martha Eliot Health Center",
+        "short_name": "E32012",
+        "lon": -71.10196,
+        "lat": 42.324173,
+        "region_id": "10",
+        "capacity": 16,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "488",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "aefc33cd-40b9-48da-8b87-415428816bdb",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      },
+      {
+        "station_id": "2028220168245183460",
+        "name": "Innerbelt at East Somerville Station",
+        "short_name": "S32057",
+        "lon": -71.08489505964093,
+        "lat": 42.378628768723964,
+        "region_id": "9",
+        "capacity": 19,
+        "rental_uris": {
+          "android": "https://bos.lft.to/lastmile_qr_scan",
+          "ios": "https://bos.lft.to/lastmile_qr_scan"
+        },
+        "legacy_id": "2028220168245183460",
+        "rental_methods": [
+          "KEY",
+          "CREDITCARD"
+        ],
+        "has_kiosk": true,
+        "station_type": "classic",
+        "external_id": "2028220168245183460",
+        "electric_bike_surcharge_waiver": false,
+        "eightd_station_services": [],
+        "eightd_has_key_dispenser": false
+      }
+    ]
+  },
+  "last_updated": 1792868874,
+  "ttl": 60
+}

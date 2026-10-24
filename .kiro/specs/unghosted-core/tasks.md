@@ -6,7 +6,7 @@ Build the core pipeline in order: feeds → collector → static_load → labele
 
 ## Tasks
 
-- [ ] 1. Set up database schema and test fixtures
+- [x] 1. Set up database schema and test fixtures
   - Create data/raw.db schema (pred_snap, veh_snap, dock_snap, poll_log, labels tables).
   - Create tests/fixtures/ raw feed snapshots (trip_updates.json, vehicle_positions.json, stations.json) with real or realistic data.
   - _Requirements: 2.3, 1.7_
