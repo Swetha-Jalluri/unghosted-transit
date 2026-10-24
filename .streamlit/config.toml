@@ -1,0 +1,15 @@
+[theme]
+# Clean modern light theme for Unghosted
+base = "light"
+primaryColor = "#2563EB"            # blue accent
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F4F6FB"
+textColor = "#1A1F2B"
+font = "sans serif"
+
+[server]
+headless = true
+
+[browser]
+# No usage statistics / analytics
+gatherUsageStats = false
