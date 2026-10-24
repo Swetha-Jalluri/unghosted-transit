@@ -1,25 +1,27 @@
 """Service layer for Unghosted contract."""
 import json
 import sqlite3
+import time
 import yaml
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
-import time
 
+from core.backup import select_backups
+from core.bus_trust import compute_realistic_eta_range, compute_status_and_why
 from core.contracts import (
+    BusPrediction,
     BusTrustResponse,
     ChanceBasis,
     DemoStop,
     DockResult,
     DockTrustResponse,
+    Evidence,
     Findings,
     Health,
+    LiveDataUnavailable,
     NotFound,
     ReplayWindow,
-    BusPrediction,
-    Evidence,
-    LiveDataUnavailable,
 )
 from core.database import get_connection
 
@@ -59,14 +61,7 @@ def list_demo_stops() -> list[DemoStop]:
     """List available demo stops from config.yaml with real names from static_load and routes from raw.db."""
     demo_stop_ids = CONFIG.get("demo_stops", [])
     
-    # Static mapping of demo stops to MBTA names for fallback
-    demo_stop_names = {
-        "64000": "Nubian Square",
-        "23391": "Back Bay",
-        "334": "Ashmont",
-    }
-    
-    # Try to get stops from static_load, fall back to static mapping
+    # Try to get stops from static_load, fall back to stop_id
     stops_dict = {}
     try:
         from core.static_load import get_stops
@@ -77,10 +72,10 @@ def list_demo_stops() -> list[DemoStop]:
     demo_stops = []
     
     for stop_id in demo_stop_ids:
-        # Get name from static_load.get_stops() (MBTA V3 API) or fall back to static mapping
+        # Get name from static_load.get_stops() (MBTA V3 API) or fall back to stop_id
         stop_name = stops_dict.get(stop_id, {}).get("name")
         if not stop_name:
-            stop_name = demo_stop_names.get(stop_id, f"Stop {stop_id}")
+            stop_name = stop_id
         
         # Get routes from raw.db pred_snap for this stop
         routes = set()
@@ -105,7 +100,7 @@ def list_demo_stops() -> list[DemoStop]:
             DemoStop(
                 stop_id=stop_id,
                 name=stop_name,
-                routes=sorted(list(routes)),
+                routes=sorted(routes),
             )
         )
     
@@ -151,63 +146,136 @@ def get_bus_trust(
                 conn = get_connection(RAW_DB)
                 cursor = conn.cursor()
                 
-                # Get latest predictions for this stop
+                # Get latest poll timestamp and data ages
+                cursor.execute(
+                    "SELECT ts, data_age_trip_updates, data_age_vehicle_positions FROM poll_log ORDER BY ts DESC LIMIT 1"
+                )
+                latest_poll = cursor.fetchone()
+                if latest_poll:
+                    poll_ts = latest_poll["ts"]
+                    if latest_poll["data_age_trip_updates"] is not None:
+                        data_age_sec["trip_updates"] = latest_poll["data_age_trip_updates"]
+                    if latest_poll["data_age_vehicle_positions"] is not None:
+                        data_age_sec["vehicle_positions"] = latest_poll["data_age_vehicle_positions"]
+                else:
+                    poll_ts = None
+                
+                # Get latest predictions for this stop with all vehicle data
                 cursor.execute("""
-                    SELECT DISTINCT route_id, trip_id, app_eta_min, uncertainty, 
-                                    schedule_relationship, revenue, headsign
-                    FROM pred_snap
-                    WHERE stop_id = ?
-                    ORDER BY ts DESC
-                    LIMIT ?
-                """, (stop_id, limit))
+                    SELECT DISTINCT p.route_id, p.trip_id, p.app_eta_min, p.uncertainty, 
+                                    p.schedule_relationship, p.revenue, p.headsign,
+                                    v.current_status, v.vehicle_timestamp, v.vehicle_id
+                    FROM pred_snap p
+                    LEFT JOIN veh_snap v ON p.trip_id = v.trip_id
+                    WHERE p.stop_id = ?
+                    ORDER BY p.ts DESC, p.trip_id
+                """, (stop_id,))
                 
                 rows = cursor.fetchall()
                 conn.close()
                 
                 if rows:
+                    # Group by trip_id to get one row per prediction (latest vehicle state)
+                    seen_trips = set()
+                    predictions_data = []
+                    
                     for row in rows:
+                        trip_id = row["trip_id"]
+                        if trip_id not in seen_trips:
+                            seen_trips.add(trip_id)
+                            predictions_data.append(row)
+                    
+                    # Score each prediction
+                    for row in predictions_data[:limit * 2]:  # Get more to filter hidden
                         route_id = row["route_id"]
                         trip_id = row["trip_id"]
                         app_eta_min = row["app_eta_min"]
                         uncertainty = row["uncertainty"]
                         schedule_relationship = row["schedule_relationship"]
                         revenue = row["revenue"]
+                        headsign = row["headsign"]
                         
-                        # Check if hidden (revenue=false or uncertainty > 301)
-                        if revenue == 0 or (uncertainty is not None and uncertainty > 301):
+                        # Build evidence from vehicle data
+                        vehicle_id = row["vehicle_id"]
+                        current_status = row["current_status"]
+                        vehicle_timestamp = row["vehicle_timestamp"]
+                        
+                        # Calculate location age from vehicle timestamp
+                        location_age_sec = None
+                        if poll_ts and vehicle_timestamp:
+                            location_age_sec = poll_ts - vehicle_timestamp
+                        
+                        evidence = Evidence(
+                            uncertainty=uncertainty,
+                            vehicle_id=vehicle_id,
+                            location_age_sec=location_age_sec,
+                        )
+                        
+                        # Build prediction dict for scoring
+                        pred_dict = {
+                            "route_id": route_id,
+                            "trip_id": trip_id,
+                            "app_eta_min": app_eta_min,
+                            "revenue": revenue,
+                            "schedule_relationship": schedule_relationship,
+                            "current_status": current_status,
+                            "headsign": headsign,
+                        }
+                        
+                        # Compute status and why using bus_trust engine
+                        status, why, reason_codes, chance_it_arrives = compute_status_and_why(
+                            pred_dict,
+                            {
+                                "uncertainty": uncertainty,
+                                "vehicle_id": vehicle_id,
+                                "location_age_sec": location_age_sec,
+                            },
+                        )
+                        
+                        # Check if hidden (chance_it_arrives is None)
+                        if chance_it_arrives is None:
                             hidden_count += 1
                             continue
                         
-                        # Create prediction with placeholder chance
+                        # Compute realistic ETA range
+                        realistic_eta_min = compute_realistic_eta_range(
+                            app_eta_min, status, evidence, uncertainty
+                        )
+                        
+                        # Create prediction with computed status
                         pred = BusPrediction(
                             route_id=route_id,
                             trip_id=trip_id,
-                            headsign=row["headsign"],
+                            headsign=headsign,
                             app_eta_min=app_eta_min,
-                            status="estimate",  # Placeholder status
-                            why="Demo mode: provisional estimate",
-                            reason_codes=["demo_mode"],
-                            chance_it_arrives=0.7,  # Placeholder
+                            status=status,
+                            why=why,
+                            reason_codes=reason_codes,
+                            chance_it_arrives=chance_it_arrives,
                             chance_basis=ChanceBasis(method="placeholder", n=0),
-                            realistic_eta_min=(max(0.0, app_eta_min - 2.0), app_eta_min + 2.0),
-                            evidence=Evidence(uncertainty=uncertainty),
+                            realistic_eta_min=realistic_eta_min,
+                            evidence=evidence,
                         )
                         predictions.append(pred)
                     
-                    response = BusTrustResponse(
-                        stop_id=stop_id,
-                        stop_name=stop_name,
-                        generated_at=generated_at,
-                        mode=mode,
-                        data_age_sec=data_age_sec,
-                        predictions=predictions[:limit],
-                        hidden_count=hidden_count,
-                        attribution=ATTRIBUTION,
-                        disclaimer=DISCLAIMER,
-                    )
-                    return response
+                    # Trim to limit
+                    predictions = predictions[:limit]
+                    
+                    if predictions:
+                        response = BusTrustResponse(
+                            stop_id=stop_id,
+                            stop_name=stop_name,
+                            generated_at=generated_at,
+                            mode=mode,
+                            data_age_sec=data_age_sec,
+                            predictions=predictions,
+                            hidden_count=hidden_count,
+                            attribution=ATTRIBUTION,
+                            disclaimer=DISCLAIMER,
+                        )
+                        return response
             
-            except (sqlite3.Error, Exception) as e:
+            except (sqlite3.Error, Exception):
                 # Fall through to mocks if db read fails
                 pass
         
