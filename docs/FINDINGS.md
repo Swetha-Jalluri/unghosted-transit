@@ -38,7 +38,7 @@ This breakdown combines whether a vehicle was detected with the prediction's unc
 | Vehicle present | Mixed | 248 | 3,061 | 8.0% | 3,061 |
 | No vehicle assigned | Uncertainty 300 | 35 | 272 | 12.9% | 272 |
 
-**Interpretation:** Predictions without a vehicle yet assigned (uncertainty 300, schedule-based) vanished at **12.9%**, significantly higher than the **8.0%** rate for predictions with live vehicle data. This suggests that schedule-based predictions are less reliable than those with real-time vehicle tracking.
+**Interpretation:** Predictions without a vehicle yet assigned (uncertainty 300, schedule-based) vanished at **12.9%**, significantly higher than the **8.0%** rate for predictions without the uncertainty-300 flag. This suggests that schedule-based predictions are less reliable than those with real-time vehicle tracking.
 
 ## Disappearance Rate by Route
 
