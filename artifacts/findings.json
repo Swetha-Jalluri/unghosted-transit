@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-24T23:18:23Z",
+  "generated_at": "2026-10-24T23:26:23Z",
   "sample_label": "SERVED",
   "window": {
     "start": 1792870256,
@@ -11,8 +11,30 @@
     "vanished": 281,
     "canceled": 0
   },
-  "vanish_by_status": [],
-  "vanish_by_uncertainty": [],
+  "vanish_by_status": [
+    {
+      "group": "estimate",
+      "rate": 0.0836424957841484,
+      "n": 2965
+    },
+    {
+      "group": "confirmed",
+      "rate": 0.08967391304347826,
+      "n": 368
+    }
+  ],
+  "vanish_by_uncertainty": [
+    {
+      "group": "missing_vehicle=True",
+      "rate": 0.08036589349885659,
+      "n": 3061
+    },
+    {
+      "group": "300_vehicle=True",
+      "rate": 0.12867647058823528,
+      "n": 272
+    }
+  ],
   "vanish_by_route": [
     {
       "group": "111",

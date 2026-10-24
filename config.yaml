@@ -10,7 +10,7 @@ feeds:
   mbta_v3: https://api-v3.mbta.com
 
 # Demo mode
-demo_stops: ["64000", "23391", "334"]  # Nubian (routes 23,28,66), Back Bay (route 39), Ashmont (route 23)
+demo_stops: ["1148", "21148", "11148"]  # stops with confirmed vs estimate contrast
 mock_dir: tests/fixtures/mock
 
 # Thresholds and tolerances
