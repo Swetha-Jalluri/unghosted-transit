@@ -1,0 +1,133 @@
+{
+  "stop_id": "place-haecl",
+  "stop_name": "Harvard Ave at Lincoln",
+  "generated_at": "2025-01-15T14:30:00Z",
+  "mode": "demo",
+  "data_age_sec": {
+    "trip_updates": 12,
+    "vehicle_positions": 8
+  },
+  "predictions": [
+    {
+      "route_id": "1",
+      "trip_id": "trip_1_001",
+      "headsign": "Harvard Square",
+      "app_eta_min": 3.5,
+      "status": "confirmed",
+      "why": "Vehicle assigned and on route",
+      "reason_codes": ["vehicle_assigned", "on_schedule"],
+      "chance_it_arrives": 0.95,
+      "chance_basis": {
+        "method": "model",
+        "n": 450
+      },
+      "realistic_eta_min": [3.0, 4.2],
+      "evidence": {
+        "uncertainty": 45,
+        "vehicle_id": "vehicle_1234",
+        "location_age_sec": 8
+      },
+      "backup": null,
+      "outcome": null
+    },
+    {
+      "route_id": "1",
+      "trip_id": "trip_1_002",
+      "headsign": "Harvard Square",
+      "app_eta_min": 12.5,
+      "status": "estimate",
+      "why": "Schedule-based estimate, vehicle not yet assigned",
+      "reason_codes": ["no_vehicle_assigned", "schedule_based"],
+      "chance_it_arrives": 0.78,
+      "chance_basis": {
+        "method": "empirical",
+        "n": 320
+      },
+      "realistic_eta_min": [11.0, 14.5],
+      "evidence": {
+        "uncertainty": 300,
+        "vehicle_id": null,
+        "location_age_sec": null
+      },
+      "backup": {
+        "type": "bike",
+        "route_id": null,
+        "station_id": "station_hub_001",
+        "name": "Bluebikes Harvard",
+        "status": "estimate",
+        "eta_min": 8.0,
+        "walk_min": 2.0,
+        "chance": 0.65
+      },
+      "outcome": null
+    },
+    {
+      "route_id": "23",
+      "trip_id": "trip_23_001",
+      "headsign": "Ashmont Station",
+      "app_eta_min": 22.0,
+      "status": "unreliable",
+      "why": "High historical vanish rate on this route during peak",
+      "reason_codes": ["high_vanish_rate", "peak_congestion"],
+      "chance_it_arrives": 0.52,
+      "chance_basis": {
+        "method": "empirical",
+        "n": 142
+      },
+      "realistic_eta_min": [18.0, 28.0],
+      "evidence": {
+        "uncertainty": 301,
+        "vehicle_id": null,
+        "location_age_sec": null
+      },
+      "backup": {
+        "type": "bus",
+        "route_id": "66",
+        "station_id": null,
+        "name": "Route 66 - Dudley",
+        "status": "estimate",
+        "eta_min": 15.0,
+        "walk_min": 5.0,
+        "chance": 0.72
+      },
+      "outcome": null
+    },
+    {
+      "route_id": "23",
+      "trip_id": "trip_23_002",
+      "headsign": "Ashmont Station",
+      "app_eta_min": 35.5,
+      "status": "unreliable",
+      "why": "Vehicle significantly delayed; uncertainty threshold exceeded",
+      "reason_codes": ["significantly_delayed", "high_uncertainty"],
+      "chance_it_arrives": 0.48,
+      "chance_basis": {
+        "method": "model",
+        "n": 89
+      },
+      "realistic_eta_min": [25.0, 45.0],
+      "evidence": {
+        "uncertainty": 420,
+        "vehicle_id": "vehicle_5678",
+        "location_age_sec": 125
+      },
+      "backup": {
+        "type": "bike",
+        "route_id": null,
+        "station_id": "station_hub_002",
+        "name": "Bluebikes Back Bay",
+        "status": "confirmed",
+        "eta_min": 12.0,
+        "walk_min": 8.0,
+        "chance": 0.88
+      },
+      "outcome": null
+    }
+  ],
+  "hidden_count": 0,
+  "attribution": [
+    "Data: MBTA GTFS-realtime (MassDOT Developers License Agreement);",
+    "Bluebikes GBFS (Bluebikes Data License Agreement)."
+  ],
+  "disclaimer": "Unofficial. Not affiliated with or endorsed by MBTA, MassDOT or Bluebikes. For information only."
+}

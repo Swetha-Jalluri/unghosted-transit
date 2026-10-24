@@ -1,0 +1,22 @@
+{
+  "generated_at": "2025-01-15T14:30:00Z",
+  "last_poll_ts": 1737018600,
+  "polls_last_hour": 82,
+  "poll_success_rate": 0.976,
+  "rows": {
+    "pred": 3247,
+    "veh": 1842,
+    "dock": 512
+  },
+  "data_age_sec": {
+    "trip_updates": 12,
+    "vehicle_positions": 8,
+    "docks": 45
+  },
+  "modes": {
+    "demo": true,
+    "live": false,
+    "replay": true
+  },
+  "model_method": "logistic_regression"
+}

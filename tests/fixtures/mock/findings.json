@@ -1,0 +1,148 @@
+{
+  "generated_at": "2025-01-15T14:30:00Z",
+  "sample_label": "demo_sample_2025_01_15",
+  "window": {
+    "start": 1737000000,
+    "end": 1737086400
+  },
+  "totals": {
+    "labeled": 1547,
+    "served": 1123,
+    "vanished": 312,
+    "canceled": 112
+  },
+  "vanish_by_status": [
+    {
+      "group": "confirmed",
+      "rate": 0.08,
+      "n": 892
+    },
+    {
+      "group": "estimate",
+      "rate": 0.22,
+      "n": 471
+    },
+    {
+      "group": "unreliable",
+      "rate": 0.68,
+      "n": 184
+    }
+  ],
+  "vanish_by_uncertainty": [
+    {
+      "group": "< 150",
+      "rate": 0.05,
+      "n": 610
+    },
+    {
+      "group": "150-300",
+      "rate": 0.15,
+      "n": 520
+    },
+    {
+      "group": "300-400",
+      "rate": 0.35,
+      "n": 312
+    },
+    {
+      "group": "> 400",
+      "rate": 0.72,
+      "n": 105
+    }
+  ],
+  "vanish_by_route": [
+    {
+      "group": "route_1",
+      "rate": 0.12,
+      "n": 305
+    },
+    {
+      "group": "route_23",
+      "rate": 0.28,
+      "n": 210
+    },
+    {
+      "group": "route_28",
+      "rate": 0.18,
+      "n": 185
+    },
+    {
+      "group": "route_39",
+      "rate": 0.31,
+      "n": 160
+    },
+    {
+      "group": "route_66",
+      "rate": 0.14,
+      "n": 435
+    },
+    {
+      "group": "route_111",
+      "rate": 0.25,
+      "n": 252
+    }
+  ],
+  "eta_range_hit": {
+    "range_hit": 1089,
+    "single_eta_hit": 34,
+    "n": 1123
+  },
+  "least_reliable_docks": [
+    {
+      "station_id": "station_mission",
+      "name": "Bluebikes Mission",
+      "metric": "out_of_bikes_rate",
+      "n": 87
+    },
+    {
+      "station_id": "station_hub_002",
+      "name": "Bluebikes Back Bay",
+      "metric": "out_of_docks_rate",
+      "n": 62
+    }
+  ],
+  "model": {
+    "method": "logistic_regression",
+    "auc": 0.782,
+    "brier": 0.156,
+    "n_labels": 1547
+  },
+  "calibration": [
+    {
+      "bin": "0.0-0.2",
+      "predicted": 0.10,
+      "observed": 0.08,
+      "n": 203
+    },
+    {
+      "bin": "0.2-0.4",
+      "predicted": 0.30,
+      "observed": 0.32,
+      "n": 185
+    },
+    {
+      "bin": "0.4-0.6",
+      "predicted": 0.50,
+      "observed": 0.48,
+      "n": 467
+    },
+    {
+      "bin": "0.6-0.8",
+      "predicted": 0.70,
+      "observed": 0.71,
+      "n": 523
+    },
+    {
+      "bin": "0.8-1.0",
+      "predicted": 0.90,
+      "observed": 0.91,
+      "n": 169
+    }
+  ],
+  "eval": {
+    "holdout_window": "2025-01-13 to 2025-01-14",
+    "n_train": 1123,
+    "n_test": 424
+  },
+  "is_placeholder": true
+}

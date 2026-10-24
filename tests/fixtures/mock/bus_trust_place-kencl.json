@@ -1,0 +1,115 @@
+{
+  "stop_id": "place-kencl",
+  "stop_name": "Kendall/MIT",
+  "generated_at": "2025-01-15T14:30:00Z",
+  "mode": "demo",
+  "data_age_sec": {
+    "trip_updates": 10,
+    "vehicle_positions": 5
+  },
+  "predictions": [
+    {
+      "route_id": "66",
+      "trip_id": "trip_66_001",
+      "headsign": "Dudley Station",
+      "app_eta_min": 6.0,
+      "status": "confirmed",
+      "why": "Vehicle on route, tracking close to schedule",
+      "reason_codes": ["vehicle_assigned", "on_schedule"],
+      "chance_it_arrives": 0.96,
+      "chance_basis": {
+        "method": "model",
+        "n": 580
+      },
+      "realistic_eta_min": [5.5, 6.7],
+      "evidence": {
+        "uncertainty": 50,
+        "vehicle_id": "vehicle_3001",
+        "location_age_sec": 5
+      },
+      "backup": null,
+      "outcome": null
+    },
+    {
+      "route_id": "66",
+      "trip_id": "trip_66_002",
+      "headsign": "Dudley Station",
+      "app_eta_min": 20.0,
+      "status": "estimate",
+      "why": "Scheduled prediction; typical reliability",
+      "reason_codes": ["schedule_based"],
+      "chance_it_arrives": 0.75,
+      "chance_basis": {
+        "method": "empirical",
+        "n": 410
+      },
+      "realistic_eta_min": [17.0, 24.0],
+      "evidence": {
+        "uncertainty": 300,
+        "vehicle_id": null,
+        "location_age_sec": null
+      },
+      "backup": null,
+      "outcome": null
+    },
+    {
+      "route_id": "111",
+      "trip_id": "trip_111_001",
+      "headsign": "Dudley Station",
+      "app_eta_min": 7.5,
+      "status": "confirmed",
+      "why": "Strong signal; vehicle close and stable",
+      "reason_codes": ["vehicle_assigned", "on_schedule"],
+      "chance_it_arrives": 0.94,
+      "chance_basis": {
+        "method": "model",
+        "n": 520
+      },
+      "realistic_eta_min": [6.8, 8.5],
+      "evidence": {
+        "uncertainty": 65,
+        "vehicle_id": "vehicle_3002",
+        "location_age_sec": 5
+      },
+      "backup": null,
+      "outcome": null
+    },
+    {
+      "route_id": "111",
+      "trip_id": "trip_111_002",
+      "headsign": "Dudley Station",
+      "app_eta_min": 32.0,
+      "status": "unreliable",
+      "why": "Stalled or missing signal; poor predictability",
+      "reason_codes": ["stalled", "missing_signal"],
+      "chance_it_arrives": 0.40,
+      "chance_basis": {
+        "method": "empirical",
+        "n": 75
+      },
+      "realistic_eta_min": [20.0, 45.0],
+      "evidence": {
+        "uncertainty": 450,
+        "vehicle_id": "vehicle_3003",
+        "location_age_sec": 200
+      },
+      "backup": {
+        "type": "bike",
+        "route_id": null,
+        "station_id": "station_kencl",
+        "name": "Bluebikes Kendall",
+        "status": "estimate",
+        "eta_min": 11.0,
+        "walk_min": 1.0,
+        "chance": 0.82
+      },
+      "outcome": null
+    }
+  ],
+  "hidden_count": 0,
+  "attribution": [
+    "Data: MBTA GTFS-realtime (MassDOT Developers License Agreement);",
+    "Bluebikes GBFS (Bluebikes Data License Agreement)."
+  ],
+  "disclaimer": "Unofficial. Not affiliated with or endorsed by MBTA, MassDOT or Bluebikes. For information only."
+}
