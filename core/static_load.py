@@ -48,17 +48,29 @@ def fetch_and_cache_stops(config: Optional[dict] = None) -> dict[str, dict]:
         mbta_v3_url = config.get("feeds", {}).get("mbta_v3", "https://api-v3.mbta.com")
         api_key = os.getenv("MBTA_API_KEY", "")
         
-        # Fetch all stops with minimal fields
+        # Get demo_stops from config to fetch only needed stops
+        demo_stops = config.get("demo_stops", [])
+        
+        # Fetch stops with minimal fields using filter for specific stop IDs
         stops_url = f"{mbta_v3_url}/stops"
         headers = {}
         if api_key:
             headers["x-api-key"] = api_key
         
-        params = {
-            "fields[stop]": "id,name,latitude,longitude,route_ids",
-            "include": "routes",
-            "limit": 1000,
-        }
+        # Use filter to fetch only needed stops; fall back to all stops if no demo_stops
+        if demo_stops:
+            stop_ids_filter = ",".join(demo_stops)
+            params = {
+                "filter[id]": stop_ids_filter,
+                "fields[stop]": "id,name,latitude,longitude",
+                "limit": len(demo_stops) + 10,  # Small buffer
+            }
+        else:
+            params = {
+                "fields[stop]": "id,name,latitude,longitude,route_ids",
+                "include": "routes",
+                "limit": 1000,
+            }
         
         response = requests.get(stops_url, headers=headers, params=params, timeout=10)
         response.raise_for_status()

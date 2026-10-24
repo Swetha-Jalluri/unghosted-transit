@@ -25,23 +25,24 @@ def compute_status_and_why(
         tuple: (status, why, reason_codes, chance_it_arrives)
         - status: "confirmed" | "estimate" | "unreliable"
         - why: Human-readable explanation
-        - reason_codes: List of reason codes
+        - reason_codes: List of reason codes (NO_VEHICLE_ASSIGNED, BUS_STALLED_OR_DELAYED, STALE_LOCATION, NOT_MOVING, TRIP_CANCELED, HIGH_VANISH_RATE_TODAY)
         - chance_it_arrives: float in [0, 1] or None if hidden
     
     Implements decision rules in order:
         1. If revenue=false OR uncertainty > 301 → hidden (return None for chance)
-        2. If schedule_relationship CANCELED → status=unreliable
-        3. If uncertainty 300 or 301 → status = at most estimate
-        4. If location_age_sec > 120 → status != confirmed
-        5. If vehicle not moving → downgrade status
-        6. If vanish_rate > threshold → status=unreliable, add backup note
+        2. If schedule_relationship CANCELED → status=unreliable, TRIP_CANCELED
+        3. Confirmed requires: vehicle_id present AND location_age_sec <= 120 AND uncertainty < 300
+        4. If no vehicle or stale location → "estimate" with NO_VEHICLE_ASSIGNED or STALE_LOCATION
+        5. If uncertainty 300 or 301 → "estimate" with BUS_STALLED_OR_DELAYED
+        6. If vehicle not moving → downgrade with NOT_MOVING
+        7. If vanish_rate > threshold → status=unreliable, HIGH_VANISH_RATE_TODAY
     """
     if vanish_rates is None:
         vanish_rates = {}
     
-    status = "confirmed"
+    status = "estimate"
     reason_codes = []
-    why = f"Status: {status}"  # Initialize why to avoid UnboundLocalError
+    why = ""
     
     # Extract fields with safe defaults
     revenue = pred.get("revenue", True)
@@ -54,49 +55,62 @@ def compute_status_and_why(
     
     # Rule 1: Check revenue and uncertainty for hidden prediction
     if revenue is False or (uncertainty is not None and uncertainty > 301):
-        reason_codes.append("hidden")
         why = "Hidden prediction (non-revenue or invalid data)"
-        return (status, why, reason_codes, None)  # None signals hidden
+        return (status, why, ["hidden"], None)  # None signals hidden
     
     # Rule 2: Check if trip is CANCELED
     if schedule_relationship in ["CANCELED", "SKIPPED"]:
         status = "unreliable"
-        reason_codes.append("schedule_canceled")
+        reason_codes.append("TRIP_CANCELED")
         why = "Trip canceled or skipped in schedule"
         chance = 0.0  # Canceled trips never arrive
         return (status, why, reason_codes, chance)
     
-    # Rule 3: Check uncertainty (300/301 limits confirmed status)
-    if uncertainty is not None and uncertainty >= 300:
+    # Rule 3: Confirmed requires vehicle_id + fresh location + low uncertainty
+    has_vehicle = vehicle_id is not None
+    fresh_location = location_age_sec is not None and location_age_sec <= 120
+    low_uncertainty = uncertainty is None or uncertainty < 300
+    
+    if has_vehicle and fresh_location and low_uncertainty:
+        status = "confirmed"
+        why = "Vehicle assigned and tracking well"
+    else:
+        # Determine why not confirmed - collect all reasons
+        if not has_vehicle:
+            reason_codes.append("NO_VEHICLE_ASSIGNED")
+        
+        if location_age_sec is not None and location_age_sec > 120:
+            reason_codes.append("STALE_LOCATION")
+        
+        if uncertainty is not None and uncertainty >= 300:
+            reason_codes.append("BUS_STALLED_OR_DELAYED")
+        
+        # Set why message based on primary issue
+        if not has_vehicle:
+            why = "No vehicle assigned; schedule-based arrival"
+        elif location_age_sec is not None and location_age_sec > 120:
+            why = f"Vehicle location stale ({location_age_sec}s old)"
+        elif uncertainty is not None and uncertainty >= 300:
+            why = "Bus stalled or significantly delayed"
+        else:
+            why = "Prediction status estimate"
+        
         status = "estimate"
-        reason_codes.append("high_uncertainty")
-        why = "Schedule-based or stalled (high uncertainty)"
     
-    # Rule 4: Check location age (>120s never confirmed)
-    if location_age_sec is not None and location_age_sec > 120:
-        status = "unreliable" if status == "unreliable" else "estimate"
-        reason_codes.append("location_stale")
-        why = "Vehicle location data stale (>120s old)"
-    
-    # Rule 5: Check vehicle motion
-    if current_status is not None and current_status == "STOPPED_AT":
-        # Vehicle stopped; downgrade if currently confirmed
-        if status == "confirmed":
-            status = "estimate"
-        if "vehicle_stopped" not in reason_codes:
-            reason_codes.append("vehicle_stopped")
+    # Rule 5: Check vehicle motion (only downgrade if confirmed)
+    if status == "confirmed" and current_status == "STOPPED_AT":
+        status = "estimate"
+        reason_codes.append("NOT_MOVING")
+        why = "Vehicle stopped"
     
     # Rule 6: Check vanish rate
     if route_id and route_id in vanish_rates:
         vanish_rate = vanish_rates[route_id]
         if vanish_rate > 0.25:  # Threshold from config (unreliable_vanish_rate)
             status = "unreliable"
-            reason_codes.append("high_vanish_rate")
-            why = f"High vanish rate ({vanish_rate:.1%}) on this route"
-    
-    # Final why message - include reasons if not already set
-    if reason_codes and ":" not in why:
-        why = f"{why}; Reasons: {', '.join(reason_codes)}"
+            if "HIGH_VANISH_RATE_TODAY" not in reason_codes:
+                reason_codes.append("HIGH_VANISH_RATE_TODAY")
+            why = f"High vanish rate ({vanish_rate:.1%}) on this route today"
     
     # Compute chance_it_arrives based on status and model
     if status == "unreliable":

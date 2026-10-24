@@ -359,7 +359,7 @@ def test_canceled_trip_unreliable():
     
     assert status == "unreliable", f"CANCELED trip should be unreliable, got {status}"
     assert chance == 0.0, f"CANCELED trip should have 0 chance, got {chance}"
-    assert "schedule_canceled" in reason_codes
+    assert "TRIP_CANCELED" in reason_codes
 
 
 def test_scheduled_trip_with_good_evidence():
@@ -479,3 +479,70 @@ def test_realistic_eta_range_validity(app_eta_min, status):
     # Property: both must be non-negative
     assert low >= 0.0, f"Negative low: {low}"
     assert high >= 0.0, f"Negative high: {high}"
+
+
+# ============================================================================
+# Property 10: Confirmed implies vehicle_id and fresh location
+# ============================================================================
+
+@given(
+    vehicle_id=st.one_of(st.just(None), st.text(min_size=1)),
+    location_age_sec=location_age_strategy(),
+    uncertainty=uncertainty_strategy(),
+    schedule_relationship=st.sampled_from(["SCHEDULED", "CANCELED"]),
+)
+def test_confirmed_requires_vehicle_and_fresh_location(
+    vehicle_id, location_age_sec, uncertainty, schedule_relationship
+):
+    """Property 10: If status is 'confirmed', then vehicle_id is not None AND location_age_sec <= 120.
+    
+    Validates: Requirements 4.1
+    Feature: unghosted-core, Property 10: Confirmed implies vehicle and fresh location
+    """
+    from core.bus_trust import compute_status_and_why
+    
+    # Skip hidden predictions
+    if schedule_relationship == "CANCELED" or (uncertainty is not None and uncertainty > 301):
+        return
+    
+    pred = {
+        "revenue": True,
+        "schedule_relationship": schedule_relationship,
+        "current_status": "IN_TRANSIT_TO",
+    }
+    evidence = {
+        "uncertainty": uncertainty if uncertainty is not None and uncertainty < 300 else 50,
+        "location_age_sec": location_age_sec,
+        "vehicle_id": vehicle_id,
+    }
+    
+    status, why, reason_codes, chance = compute_status_and_why(pred, evidence)
+    
+    # Property: If status is confirmed, then vehicle_id must not be None
+    if status == "confirmed":
+        assert vehicle_id is not None, \
+            f"status=confirmed but vehicle_id is None"
+        assert "NO_VEHICLE_ASSIGNED" not in reason_codes, \
+            f"status=confirmed but NO_VEHICLE_ASSIGNED in reason_codes"
+    
+    # Property: If status is confirmed, then location_age_sec must be <= 120
+    if status == "confirmed":
+        assert location_age_sec is not None and location_age_sec <= 120, \
+            f"status=confirmed but location_age_sec={location_age_sec} (should be <= 120)"
+        assert "STALE_LOCATION" not in reason_codes, \
+            f"status=confirmed but STALE_LOCATION in reason_codes"
+    
+    # Property: If vehicle_id is None, status must NOT be confirmed
+    if vehicle_id is None and schedule_relationship != "CANCELED":
+        assert status != "confirmed", \
+            f"vehicle_id=None but status=confirmed (should be at most estimate)"
+        if uncertainty is None or uncertainty < 300:
+            assert "NO_VEHICLE_ASSIGNED" in reason_codes, \
+                f"vehicle_id=None but NO_VEHICLE_ASSIGNED not in reason_codes"
+    
+    # Property: If location_age_sec > 120, status must NOT be confirmed
+    if location_age_sec is not None and location_age_sec > 120:
+        assert status != "confirmed", \
+            f"location_age_sec={location_age_sec} > 120 but status=confirmed"
+        assert "STALE_LOCATION" in reason_codes, \
+            f"location_age_sec > 120 but STALE_LOCATION not in reason_codes"

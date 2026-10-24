@@ -161,29 +161,27 @@ def get_bus_trust(
                     poll_ts = None
                 
                 # Get latest predictions for this stop with all vehicle data
+                # First get predictions with vehicle_id from trip updates if available
                 cursor.execute("""
                     SELECT DISTINCT p.route_id, p.trip_id, p.app_eta_min, p.uncertainty, 
                                     p.schedule_relationship, p.revenue, p.headsign,
                                     v.current_status, v.vehicle_timestamp, v.vehicle_id
                     FROM pred_snap p
-                    LEFT JOIN veh_snap v ON p.trip_id = v.trip_id
-                    WHERE p.stop_id = ?
-                    ORDER BY p.ts DESC, p.trip_id
-                """, (stop_id,))
+                    LEFT JOIN veh_snap v ON p.trip_id = v.trip_id AND v.ts = (
+                        SELECT MAX(ts) FROM veh_snap WHERE trip_id = p.trip_id
+                    )
+                    WHERE p.stop_id = ? AND p.ts = (
+                        SELECT MAX(ts) FROM pred_snap WHERE stop_id = ?
+                    )
+                    ORDER BY p.trip_id
+                """, (stop_id, stop_id))
                 
                 rows = cursor.fetchall()
                 conn.close()
                 
                 if rows:
-                    # Group by trip_id to get one row per prediction (latest vehicle state)
-                    seen_trips = set()
-                    predictions_data = []
-                    
-                    for row in rows:
-                        trip_id = row["trip_id"]
-                        if trip_id not in seen_trips:
-                            seen_trips.add(trip_id)
-                            predictions_data.append(row)
+                    # Predictions already deduplicated by query (one per trip from latest poll)
+                    predictions_data = rows
                     
                     # Score each prediction
                     for row in predictions_data[:limit * 2]:  # Get more to filter hidden
