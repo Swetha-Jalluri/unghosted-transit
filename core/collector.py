@@ -24,6 +24,12 @@ def initialize_db() -> None:
     """Create data/raw.db schema."""
     db_path = Path("data") / "raw.db"
     database.initialize_db(db_path)
+    
+    # Set WAL mode for better concurrent access
+    db = database.get_connection(db_path)
+    db.execute("PRAGMA journal_mode=WAL")
+    db.close()
+    
     logger.info(f"Initialized database at {db_path}")
 
 

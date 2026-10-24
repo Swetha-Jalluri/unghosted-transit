@@ -101,12 +101,12 @@ Build the core pipeline in order: feeds → collector → static_load → labele
   - **Property 1: Model chances in [0, 1]** - Predicted probabilities and empirical rates in [0, 1].
   - _Requirements: 5.2_
 
-- [ ] 11. Implement findings.py
+- [x] 11. Implement findings.py
   - Implement generate_findings() to compute all Findings fields: totals, vanish_by_status/uncertainty/route, eta_range_hit, least_reliable_docks, model, calibration, eval.
   - Set is_placeholder=true if demo or n_labels < min_labels; else false.
   - _Requirements: 5.5, 5.6, 5.7_
 
-- [ ] 11.1 Write property tests for findings.py
+- [x] 11.1 Write property tests for findings.py
   - **Property 1: Findings is_placeholder logic** - is_placeholder=true iff in demo or n_labels < min_labels.
   - _Requirements: 5.7_
 

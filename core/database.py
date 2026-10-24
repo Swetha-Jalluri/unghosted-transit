@@ -82,6 +82,10 @@ def initialize_db(db_path: str | Path) -> None:
             trip_id TEXT NOT NULL,
             stop_id TEXT NOT NULL,
             label TEXT NOT NULL,
+            route_id TEXT,
+            uncertainty_bucket TEXT,
+            has_vehicle INTEGER,
+            first_status TEXT,
             ts_labeled INTEGER,
             PRIMARY KEY (trip_id, stop_id)
         )

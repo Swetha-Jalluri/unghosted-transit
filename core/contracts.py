@@ -132,6 +132,7 @@ class Findings(BaseModel):
     vanish_by_status: list[RateRow]
     vanish_by_uncertainty: list[RateRow]
     vanish_by_route: list[RateRow]
+    vanish_by_status_10min: Optional[list[RateRow]] = None  # Optional: status at 10+ min before arrival
     eta_range_hit: dict[str, int]
     least_reliable_docks: list[dict]
     model: ModelInfo
