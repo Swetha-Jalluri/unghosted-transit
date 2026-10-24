@@ -34,59 +34,59 @@ Build the core pipeline in order: feeds → collector → static_load → labele
   - **Property 1: Only configured routes inserted** - For any snapshot with mixed routes, only those in config.yaml routes must be inserted.
   - _Requirements: 2.2_
 
-- [ ] 4. Implement static_load.py
+- [x] 4. Implement static_load.py
   - Implement fetch_and_cache_stops() (MBTA V3 API) and fetch_and_cache_stations() (Bluebikes GBFS).
   - Implement get_stops(), get_stations() with in-memory cache and 1-hour TTL.
   - _Requirements: 2.7_
 
-- [ ] 4.1 Write property tests for static_load.py caching
+- [x] 4.1 Write property tests for static_load.py caching
   - **Property 1: Caching returns consistent data** - Multiple calls must return same data within TTL.
   - _Requirements: 2.7_
 
-- [ ] 5. Implement labeler.py
+- [x] 5. Implement labeler.py
   - Implement assign_label() to return SERVED | VANISHED | CANCELED | OPEN per (trip_id, stop_id).
   - Implement label_predictions() to iterate all predictions in a window and store labels.
   - Implement flicker_filter() to suppress labels until prediction is old or vehicle confirmed.
   - _Requirements: 3.1, 3.2, 3.3, 3.6_
 
-- [ ] 5.1 Write property tests for labeler.py
+- [x] 5.1 Write property tests for labeler.py
   - **Property 8: One label per (trip_id, stop_id)** - For any set of snapshots, exactly one label per (trip_id, stop_id).
   - **Property 2: CANCELED propagation** - If trip marked CANCELED, all stops must have label CANCELED.
   - _Requirements: 3.1, 3.2, 3.5_
 
-- [ ] 6. Implement arrivals.py
+- [x] 6. Implement arrivals.py
   - Implement record_arrivals() to compute arrival time and ETA error for all SERVED labels.
   - Implement compute_eta_error() to return actual - predicted in minutes.
   - _Requirements: 3.4_
 
-- [ ] 7. Implement bus_trust.py (pure function)
+- [x] 7. Implement bus_trust.py (pure function)
   - Implement compute_status_and_why() to apply status rules in order: revenue, CANCELED, uncertainty, location_age, motion, vanish_rate.
   - Return (status, why, reason_codes, chance_it_arrives).
   - _Requirements: 4.1, 4.3, 4.4_
 
-- [ ] 7.1 Write property tests for bus_trust.py status rules
+- [x] 7.1 Write property tests for bus_trust.py status rules
   - **Property 2: Hidden filtering** - If revenue=false OR uncertainty > 301, must be hidden.
   - **Property 3: Location age > 120s never confirmed** - If location_age_sec > 120, status != confirmed.
   - **Property 4: Uncertainty 300/301 never confirmed** - If uncertainty in {300, 301}, status != confirmed.
   - **Property 1: Chances in [0, 1]** - All chance_it_arrives in [0, 1].
   - _Requirements: 4.1_
 
-- [ ] 8. Implement dock_trust.py (pure function)
+- [x] 8. Implement dock_trust.py (pure function)
   - Implement compute_dock_status_and_chance() to compute status and chance_bike_on_arrival.
   - Chance = 0 if NOT is_renting; else Poisson(drain_rate).
   - _Requirements: 4.2_
 
-- [ ] 8.1 Write property tests for dock_trust.py
+- [x] 8.1 Write property tests for dock_trust.py
   - **Property 5: Non-renting dock chance zero** - If is_renting=false, chance_bike_on_arrival = 0.
   - **Property 1: Dock chances in [0, 1]** - All chance_bike_on_arrival in [0, 1].
   - _Requirements: 4.2_
 
-- [ ] 9. Implement backup.py (pure function)
+- [x] 9. Implement backup.py (pure function)
   - Implement select_backups() to select next-best backup (bus or bike).
   - Never return unreliable or hidden alternatives.
   - _Requirements: 4.6_
 
-- [ ] 9.1 Write property tests for backup.py
+- [x] 9.1 Write property tests for backup.py
   - **Property 6: Backups never unreliable or hidden** - All backups must have status != unreliable and revenue=true, uncertainty <= 301.
   - _Requirements: 4.6_
 

@@ -29,7 +29,8 @@ def initialize_db(db_path: str | Path) -> None:
             uncertainty INTEGER,
             schedule_relationship TEXT,
             revenue INTEGER,
-            headsign TEXT
+            headsign TEXT,
+            stop_sequence INTEGER
         )
     """)
 
@@ -86,6 +87,20 @@ def initialize_db(db_path: str | Path) -> None:
         )
     """)
 
+    # arrivals: observed arrival times and ETA errors for SERVED labels
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS arrivals (
+            trip_id TEXT NOT NULL,
+            stop_id TEXT NOT NULL,
+            actual_arrival_ts INTEGER,
+            predicted_arrival_ts INTEGER,
+            eta_error_min REAL,
+            ts_recorded INTEGER,
+            PRIMARY KEY (trip_id, stop_id),
+            FOREIGN KEY (trip_id, stop_id) REFERENCES labels(trip_id, stop_id)
+        )
+    """)
+
     conn.commit()
     conn.close()
 
@@ -95,7 +110,7 @@ def clear_db(db_path: str | Path) -> None:
     conn = get_connection(db_path)
     cursor = conn.cursor()
 
-    for table in ["pred_snap", "veh_snap", "dock_snap", "poll_log", "labels"]:
+    for table in ["pred_snap", "veh_snap", "dock_snap", "poll_log", "labels", "arrivals"]:
         cursor.execute(f"DELETE FROM {table}")
 
     conn.commit()

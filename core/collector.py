@@ -41,8 +41,8 @@ def insert_pred_snap(db: sqlite3.Connection, rows: list[dict]) -> int:
                 """
                 INSERT INTO pred_snap
                 (ts, stop_id, route_id, trip_id, app_eta_min, uncertainty,
-                 schedule_relationship, revenue, headsign)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 schedule_relationship, revenue, headsign, stop_sequence)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     row.get("timestamp"),
@@ -54,6 +54,7 @@ def insert_pred_snap(db: sqlite3.Connection, rows: list[dict]) -> int:
                     row.get("stop_schedule_relationship"),
                     1 if row.get("revenue", True) else 0,
                     row.get("headsign"),
+                    row.get("stop_sequence"),
                 ),
             )
             count += 1
