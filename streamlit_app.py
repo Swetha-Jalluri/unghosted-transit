@@ -13,6 +13,7 @@ from __future__ import annotations
 import streamlit as st
 
 from app import about, api_mcp, operator, rider
+from app.components import footer
 from app.theme import APP_SUBTITLE, APP_TITLE
 
 st.set_page_config(
@@ -32,12 +33,20 @@ PAGES = {
 
 
 def main() -> None:
+    # Session default: start in Demo mode (sample data, no live feeds).
+    st.session_state.setdefault("rider_mode", "Demo")
+
     with st.sidebar:
         st.markdown(f"### {APP_TITLE}")
         st.caption(APP_SUBTITLE)
         choice = st.radio("Go to", list(PAGES.keys()), label_visibility="collapsed")
 
-    PAGES[choice]()
+    # Render the selected page, then always render the footer — including error
+    # states — so Disclaimer and Attribution appear on every page (R3.2, R7.1).
+    try:
+        PAGES[choice]()
+    finally:
+        footer()
 
 
 if __name__ == "__main__":

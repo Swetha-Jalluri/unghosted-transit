@@ -15,17 +15,10 @@ APP_SUBTITLE = "A trust layer for transit apps"
 APP_TAGLINE = "Apps tell you when. We tell you whether."
 
 # ---------------------------------------------------------------------------
-# Required legal text (kept identical to the product + contract rules)
+# Required legal text. Single source of truth is app.settings; theme only
+# re-exports so existing imports (components.py) keep working unchanged.
 # ---------------------------------------------------------------------------
-DISCLAIMER = (
-    "Unofficial. Not affiliated with or endorsed by MBTA, MassDOT or Bluebikes. "
-    "For information only."
-)
-
-ATTRIBUTION = (
-    "Data: MBTA GTFS-realtime (MassDOT Developers License Agreement); "
-    "Bluebikes GBFS (Bluebikes Data License Agreement)."
-)
+from app.settings import ATTRIBUTION, DISCLAIMER  # noqa: E402,F401  (re-export)
 
 # ---------------------------------------------------------------------------
 # Status vocabulary. The word is primary; color is a secondary cue only.
