@@ -374,7 +374,7 @@ def generate_findings(
     """Generate findings from labels and poll log.
 
     Args:
-        db: Database connection (if None, uses labels.db). For testing compatibility.
+        db: Database connection (if None, prefers sample.db > labels.db). For testing compatibility.
         model: Trained model object (if any)
         is_placeholder: True if demo or insufficient data
         config: Configuration dict (if None, loads from config.yaml)
@@ -405,9 +405,17 @@ def generate_findings(
         except sqlite3.OperationalError as e:
             logger.warning(f"Could not create snapshot: {e}; continuing with limited metrics")
     
-    # Use labels.db if no db provided
+    # Use provided db, or determine which to use
     if db is None:
-        db = _get_connection(LABELS_DB)
+        # Prefer sample.db > raw.db > labels.db
+        if Path(REPO_ROOT / "data" / "sample.db").exists():
+            db = _get_connection(REPO_ROOT / "data" / "sample.db")
+        elif RAW_DB.exists():
+            db = _get_connection(RAW_DB)
+        else:
+            # Initialize and use labels.db as fallback
+            _initialize_labels_db()
+            db = _get_connection(LABELS_DB)
         should_close = True
     else:
         should_close = False
