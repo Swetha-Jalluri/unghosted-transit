@@ -1,10 +1,10 @@
 [theme]
-# Clean modern light theme for Unghosted
-base = "light"
-primaryColor = "#2563EB"            # blue accent
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F4F6FB"
-textColor = "#1A1F2B"
+# Futuristic dark editorial theme for Unghosted
+base = "dark"
+primaryColor = "#007BA7"            # Cerulean Blue accent
+backgroundColor = "#0A0A0A"         # Jet Black
+secondaryBackgroundColor = "#141416"
+textColor = "#ECECEC"               # off-white body text
 font = "sans serif"
 
 [server]
