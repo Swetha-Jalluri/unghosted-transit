@@ -1,2 +1,2 @@
-# Unghosted-
+# Unghosted
 Unghosted: a trust layer for transit apps
