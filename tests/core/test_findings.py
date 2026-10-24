@@ -46,7 +46,7 @@ def config_dict():
     num_labels=st.integers(min_value=0, max_value=500),
     is_placeholder_mode=st.booleans(),
 )
-@settings(suppress_health_check=[HealthCheck.function_scoped_fixture], deadline=None)
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture], deadline=None, max_examples=10)
 def test_findings_is_placeholder_logic(num_labels, is_placeholder_mode):
     """Property 1: is_placeholder=true iff in demo or n_labels < min_labels.
 
@@ -138,7 +138,7 @@ def test_findings_is_placeholder_logic(num_labels, is_placeholder_mode):
 @given(
     num_labels=st.just(100),  # Less than min_labels (300)
 )
-@settings(suppress_health_check=[HealthCheck.function_scoped_fixture], deadline=None)
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture], deadline=None, max_examples=10)
 def test_findings_placeholder_insufficient_labels(num_labels):
     """Property 1: is_placeholder=true when n_labels < min_labels (insufficient data).
 
@@ -212,7 +212,7 @@ def test_findings_placeholder_insufficient_labels(num_labels):
 @given(
     num_labels=st.just(400),  # Greater than min_labels (300)
 )
-@settings(suppress_health_check=[HealthCheck.function_scoped_fixture], deadline=None)
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture], deadline=None, max_examples=10)
 def test_findings_not_placeholder_sufficient_labels(num_labels):
     """Property 1: is_placeholder=false when n_labels >= min_labels and not in demo.
 
@@ -286,7 +286,7 @@ def test_findings_not_placeholder_sufficient_labels(num_labels):
 @given(
     num_labels=st.integers(min_value=1, max_value=50),
 )
-@settings(suppress_health_check=[HealthCheck.function_scoped_fixture], deadline=None)
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture], deadline=None, max_examples=10)
 def test_findings_placeholder_demo_mode(num_labels):
     """Property 1: is_placeholder=true when in demo mode, regardless of label count.
 

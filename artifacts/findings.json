@@ -1,25 +1,73 @@
 {
-  "generated_at": "2026-10-24T21:04:02Z",
+  "generated_at": "2026-10-24T22:17:43Z",
   "sample_label": "SERVED",
   "window": {
     "start": 1792870256,
-    "end": 1792875816
+    "end": 1792875908
   },
   "totals": {
-    "labeled": 3068,
-    "served": 2859,
-    "vanished": 105,
+    "labeled": 3453,
+    "served": 3052,
+    "vanished": 281,
     "canceled": 0
   },
   "vanish_by_status": [
     {
-      "group": "VANISHED",
-      "rate": 0.03422425032594524,
-      "n": 105
+      "group": "estimate",
+      "rate": 0.0836424957841484,
+      "n": 2965
+    },
+    {
+      "group": "confirmed",
+      "rate": 0.08967391304347826,
+      "n": 368
     }
   ],
-  "vanish_by_uncertainty": [],
-  "vanish_by_route": [],
+  "vanish_by_uncertainty": [
+    {
+      "group": "missing_vehicle=True",
+      "rate": 0.08036589349885659,
+      "n": 3061
+    },
+    {
+      "group": "300_vehicle=True",
+      "rate": 0.12867647058823528,
+      "n": 272
+    }
+  ],
+  "vanish_by_route": [
+    {
+      "group": "111",
+      "rate": 0.06818181818181818,
+      "n": 484
+    },
+    {
+      "group": "28",
+      "rate": 0.0780559646539028,
+      "n": 679
+    },
+    {
+      "group": "39",
+      "rate": 0.0661764705882353,
+      "n": 408
+    },
+    {
+      "group": "23",
+      "rate": 0.06788990825688074,
+      "n": 545
+    },
+    {
+      "group": "1",
+      "rate": 0.07956600361663653,
+      "n": 553
+    },
+    {
+      "group": "66",
+      "rate": 0.13102409638554216,
+      "n": 664
+    }
+  ],
+  "vanish_by_status_10min": null,
   "eta_range_hit": {
     "range_hit": 0,
     "single_eta_hit": 0,
@@ -30,12 +78,12 @@
     "method": "empirical",
     "auc": null,
     "brier": null,
-    "n_labels": 3068
+    "n_labels": 3453
   },
   "calibration": [],
   "eval": {
     "holdout_window": null,
-    "n_train": 3068,
+    "n_train": 3453,
     "n_test": 0
   },
   "is_placeholder": false

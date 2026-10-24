@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 # Resolve paths relative to repo root
 REPO_ROOT = Path(__file__).resolve().parent.parent
 RAW_DB = REPO_ROOT / "data" / "raw.db"
+RAW_SNAPSHOT_DB = REPO_ROOT / "data" / "raw_snapshot.db"
 LABELS_DB = REPO_ROOT / "data" / "labels.db"
 
 
@@ -23,6 +24,36 @@ def load_config() -> dict:
     config_path = REPO_ROOT / "config.yaml"
     with open(config_path) as f:
         return yaml.safe_load(f)
+
+
+def _create_snapshot(timeout_sec: int = 30) -> None:
+    """Create a read-only snapshot of raw.db using SQLite backup API.
+    
+    This avoids database locks by copying raw.db to raw_snapshot.db
+    while the collector may be writing. Uses sqlite3's backup API with timeout.
+    
+    Args:
+        timeout_sec: Timeout for establishing backup connection (default 30s).
+    """
+    if not RAW_DB.exists():
+        return
+    
+    try:
+        # Set timeout on source connection to avoid hangs
+        src = sqlite3.connect(str(RAW_DB), timeout=timeout_sec)
+        dst = sqlite3.connect(str(RAW_SNAPSHOT_DB), timeout=timeout_sec)
+        
+        try:
+            # Perform backup
+            with dst:
+                src.backup(dst)
+            logger.info(f"Created snapshot at {RAW_SNAPSHOT_DB}")
+        finally:
+            src.close()
+            dst.close()
+    except sqlite3.OperationalError as e:
+        logger.error(f"Failed to create snapshot: {e}")
+        raise
 
 
 def _get_connection(db_path: Path) -> sqlite3.Connection:
@@ -40,6 +71,7 @@ def _initialize_labels_db() -> None:
     conn = _get_connection(db_path)
     cursor = conn.cursor()
     
+    # Create labels table with enriched columns
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS labels (
             trip_id TEXT NOT NULL,
@@ -49,10 +81,22 @@ def _initialize_labels_db() -> None:
             uncertainty_bucket TEXT,
             has_vehicle INTEGER,
             first_status TEXT,
+            first_status_10min TEXT,
             ts_labeled INTEGER,
             PRIMARY KEY (trip_id, stop_id)
         )
     """)
+    
+    # Add missing columns if they don't exist (schema migration)
+    cursor.execute("PRAGMA table_info(labels)")
+    columns = {row[1] for row in cursor.fetchall()}
+    
+    if "first_status_10min" not in columns:
+        try:
+            cursor.execute("ALTER TABLE labels ADD COLUMN first_status_10min TEXT")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+    
     conn.commit()
     conn.close()
 
@@ -61,7 +105,8 @@ def _compute_labels_from_raw(config: dict | None = None) -> int:
     """Compute labels from raw.db snapshots and save enriched data to labels.db.
     
     For each labeled prediction (SERVED or VANISHED), stores:
-    - route_id, uncertainty bucket, has_vehicle, first_status (from bus_trust)
+    - route_id, uncertainty bucket, has_vehicle (measured at FIRST SIGHTING), 
+      first_status, first_status_10min (from bus_trust)
     
     Only labels predictions whose predicted arrival time is > 5 minutes in the past.
     
@@ -106,14 +151,6 @@ def _compute_labels_from_raw(config: dict | None = None) -> int:
             trip_id = pred_row[0]
             stop_id = pred_row[1]
             
-            # Skip if already labeled
-            labels_cursor.execute(
-                "SELECT label FROM labels WHERE trip_id = ? AND stop_id = ?",
-                (trip_id, stop_id)
-            )
-            if labels_cursor.fetchone():
-                continue
-            
             # Get the earliest (first sighting) prediction for this (trip, stop) pair
             raw_cursor.execute("""
                 SELECT ts, stop_id, route_id, trip_id, app_eta_min, uncertainty,
@@ -144,13 +181,27 @@ def _compute_labels_from_raw(config: dict | None = None) -> int:
                 elif uncertainty == 301:
                     uncertainty_bucket = "301"
             
+            # FIX 1: has_vehicle measured AT FIRST SIGHTING only
+            # Query vehicle records AT OR BEFORE first sighting timestamp
+            raw_cursor.execute("""
+                SELECT ts, trip_id, route_id, stop_sequence, current_status,
+                       vehicle_timestamp, vehicle_id
+                FROM veh_snap
+                WHERE trip_id = ? AND ts <= ?
+                ORDER BY ts DESC
+                LIMIT 1
+            """, (trip_id, pred_ts))
+            
+            first_sighting_veh = raw_cursor.fetchone()
+            has_vehicle_at_first_sighting = 1 if first_sighting_veh and first_sighting_veh[6] else 0
+            
             # If trip was marked CANCELED, label as CANCELED
             if pred[6] in ("CANCELED", "SKIPPED"):
                 label = "CANCELED"
                 first_status = "unreliable"
-                has_vehicle = False
+                first_status_10min = None
             else:
-                # Check vehicle history for arrival
+                # Check vehicle history for arrival (AFTER first sighting)
                 raw_cursor.execute("""
                     SELECT ts, trip_id, route_id, stop_sequence, current_status,
                            vehicle_timestamp, vehicle_id
@@ -163,10 +214,8 @@ def _compute_labels_from_raw(config: dict | None = None) -> int:
                 
                 # Check if vehicle reached this stop (SERVED)
                 label = "OPEN"
-                has_vehicle = False
                 
                 if veh_records:
-                    has_vehicle = True
                     # Check if any vehicle record indicates arrival
                     for veh in veh_records:
                         vehicle_timestamp = veh[5]
@@ -202,17 +251,14 @@ def _compute_labels_from_raw(config: dict | None = None) -> int:
                         label = "OPEN"
                 
                 # Compute first_status using bus_trust at first sighting
-                # Get vehicle data at first sighting
                 location_age_sec = None
                 vehicle_id = None
                 current_status = None
                 
-                if veh_records:
-                    # Use most recent vehicle record at or before first pred
-                    first_vehicle = veh_records[-1]  # Oldest (closest in time to pred)
-                    vehicle_id = first_vehicle[6]
-                    location_age_sec = pred_ts - first_vehicle[5] if first_vehicle[5] else None
-                    current_status = first_vehicle[4]
+                if first_sighting_veh:
+                    vehicle_id = first_sighting_veh[6]
+                    location_age_sec = pred_ts - first_sighting_veh[5] if first_sighting_veh[5] else None
+                    current_status = first_sighting_veh[4]
                 
                 evidence = {
                     "uncertainty": uncertainty,
@@ -232,16 +278,75 @@ def _compute_labels_from_raw(config: dict | None = None) -> int:
                 
                 status, _, _, _ = compute_status_and_why(pred_dict, evidence)
                 first_status = status if status is not None else "estimate"
+                
+                # FIX 2: Compute first_status_10min at 10+ minutes before predicted arrival
+                # Query predictions at or after (pred_arrival_time - 600 seconds)
+                ten_min_before_arrival = pred_arrival_time - 600
+                
+                raw_cursor.execute("""
+                    SELECT ts, route_id, app_eta_min, uncertainty, schedule_relationship, 
+                           revenue, headsign
+                    FROM pred_snap
+                    WHERE trip_id = ? AND stop_id = ? AND ts >= ?
+                    ORDER BY ts DESC
+                    LIMIT 1
+                """, (trip_id, stop_id, ten_min_before_arrival))
+                
+                pred_10min = raw_cursor.fetchone()
+                first_status_10min = None
+                
+                if pred_10min:
+                    # Find vehicle record at this earlier prediction time
+                    pred_10min_ts = pred_10min[0]
+                    
+                    raw_cursor.execute("""
+                        SELECT ts, vehicle_timestamp, vehicle_id, current_status
+                        FROM veh_snap
+                        WHERE trip_id = ? AND ts <= ?
+                        ORDER BY ts DESC
+                        LIMIT 1
+                    """, (trip_id, pred_10min_ts))
+                    
+                    veh_10min = raw_cursor.fetchone()
+                    veh_id_10min = None
+                    veh_ts_10min = None
+                    status_10min = None
+                    
+                    if veh_10min:
+                        veh_ts_10min = veh_10min[1]
+                        veh_id_10min = veh_10min[2]
+                        status_10min = veh_10min[3]
+                    
+                    location_age_10min = pred_10min_ts - veh_ts_10min if veh_ts_10min else None
+                    
+                    evidence_10min = {
+                        "uncertainty": pred_10min[3],
+                        "vehicle_id": veh_id_10min,
+                        "location_age_sec": location_age_10min,
+                    }
+                    
+                    pred_dict_10min = {
+                        "route_id": pred_10min[1],
+                        "trip_id": trip_id,
+                        "app_eta_min": pred_10min[2],
+                        "revenue": pred_10min[5],
+                        "schedule_relationship": pred_10min[4],
+                        "current_status": status_10min,
+                        "headsign": pred_10min[6],
+                    }
+                    
+                    status_10min_val, _, _, _ = compute_status_and_why(pred_dict_10min, evidence_10min)
+                    first_status_10min = status_10min_val if status_10min_val is not None else "estimate"
             
             # Insert enriched label into labels.db
             labels_cursor.execute(
                 """
                 INSERT OR IGNORE INTO labels 
-                (trip_id, stop_id, label, route_id, uncertainty_bucket, has_vehicle, first_status, ts_labeled)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                (trip_id, stop_id, label, route_id, uncertainty_bucket, has_vehicle, first_status, first_status_10min, ts_labeled)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (trip_id, stop_id, label, pred_route_id, uncertainty_bucket, 
-                 int(has_vehicle), first_status, int(time.time()))
+                 has_vehicle_at_first_sighting, first_status, first_status_10min, int(time.time()))
             )
             labeled_count += 1
         
@@ -280,9 +385,25 @@ def generate_findings(
     if config is None:
         config = load_config()
     
-    # Ensure labels are computed (only when raw.db exists)
+    # FIX 3: Recompute labels on every call from fresh snapshot
+    # This ensures totals grow over time as new data arrives
+    # Skip if raw.db is busy (being written by collector)
     if RAW_DB.exists():
-        _compute_labels_from_raw(config)
+        try:
+            _compute_labels_from_raw(config)
+        except sqlite3.OperationalError as e:
+            if "locked" in str(e).lower():
+                logger.debug("raw.db is locked; skipping label recomputation")
+            else:
+                logger.warning(f"Could not recompute labels: {e}")
+    
+    # Create snapshot of raw.db to avoid locks
+    has_raw_db = RAW_DB.exists()
+    if has_raw_db:
+        try:
+            _create_snapshot(timeout_sec=30)
+        except sqlite3.OperationalError as e:
+            logger.warning(f"Could not create snapshot: {e}; continuing with limited metrics")
     
     # Use labels.db if no db provided
     if db is None:
@@ -318,20 +439,22 @@ def generate_findings(
         # Most common label
         sample_label = max(label_counts.keys(), key=lambda k: label_counts[k]) if label_counts else "OPEN"
 
-        # ========== Get window from poll_log (read from raw.db) ==========
-        if RAW_DB.exists():
-            raw_conn = _get_connection(RAW_DB)
-            raw_cursor = raw_conn.cursor()
-            
-            raw_cursor.execute(
-                """
-                SELECT MIN(ts), MAX(ts) FROM poll_log WHERE success = 1
-                """
-            )
-            window_row = raw_cursor.fetchone()
-            raw_conn.close()
-        else:
-            window_row = None
+        # ========== Get window from poll_log (read from snapshot if available) ==========
+        window_row = None
+        if has_raw_db and RAW_SNAPSHOT_DB.exists():
+            try:
+                raw_conn = _get_connection(RAW_SNAPSHOT_DB)
+                raw_cursor = raw_conn.cursor()
+                
+                raw_cursor.execute(
+                    """
+                    SELECT MIN(ts), MAX(ts) FROM poll_log WHERE success = 1
+                    """
+                )
+                window_row = raw_cursor.fetchone()
+                raw_conn.close()
+            except sqlite3.OperationalError:
+                window_row = None
         
         if window_row and window_row[0] and window_row[1]:
             window_start = window_row[0]
@@ -353,35 +476,214 @@ def generate_findings(
 
         window = {"start": window_start, "end": window_end}
 
+        # ========== Fetch first-sighting data in one query ==========
+        # For each (trip_id, stop_id), get MIN(ts) and associated fields
+        first_sightings = {}  # (trip_id, stop_id) -> {ts, route_id, uncertainty, schedule_rel, revenue}
+        
+        if has_raw_db and RAW_SNAPSHOT_DB.exists():
+            try:
+                raw_conn = _get_connection(RAW_SNAPSHOT_DB)
+                raw_cursor = raw_conn.cursor()
+                
+                # Use MIN(ts) subquery to get first sighting per (trip_id, stop_id)
+                raw_cursor.execute("""
+                    SELECT p1.trip_id, p1.stop_id, p1.ts, p1.route_id, p1.uncertainty, 
+                           p1.schedule_relationship, p1.revenue
+                    FROM pred_snap p1
+                    WHERE (p1.trip_id, p1.stop_id, p1.ts) IN (
+                        SELECT trip_id, stop_id, MIN(ts)
+                        FROM pred_snap
+                        GROUP BY trip_id, stop_id
+                    )
+                """)
+                
+                for row in raw_cursor.fetchall():
+                    trip_id, stop_id, ts, route_id, uncertainty, schedule_rel, revenue = row
+                    first_sightings[(trip_id, stop_id)] = {
+                        "ts": ts,
+                        "route_id": route_id,
+                        "uncertainty": uncertainty,
+                        "schedule_relationship": schedule_rel,
+                        "revenue": revenue,
+                    }
+                
+                raw_conn.close()
+            except sqlite3.OperationalError as e:
+                logger.warning(f"Could not fetch first sightings: {e}")
+
         # ========== Vanish rates by status ==========
         vanish_by_status = []
-        if total_labeled > 0:
-            # Get vanished count
-            cursor.execute(
-                """
-                SELECT COUNT(*) as count
-                FROM labels
-                WHERE label = 'VANISHED'
-                """
-            )
-            vanished_row = cursor.fetchone()
-            if vanished_row and vanished_row[0] > 0:
-                vanished_count = vanished_row[0]
-                vanish_rate = vanished_count / total_labeled
-                vanish_by_status.append(
-                    RateRow(group="VANISHED", rate=vanish_rate, n=vanished_count)
+        if total_labeled > 0 and first_sightings:
+            try:
+                cursor.execute(
+                    """
+                    SELECT trip_id, stop_id, label, first_status
+                    FROM labels
+                    WHERE label IN ('SERVED', 'VANISHED')
+                    """
                 )
+                label_rows = cursor.fetchall()
+                
+                status_label_map = {}  # status_name -> {vanished, total}
+                
+                for trip_id, stop_id, label, first_status in label_rows:
+                    key = (trip_id, stop_id)
+                    if key not in first_sightings:
+                        continue
+                    
+                    # Use first_status from labels table
+                    if first_status not in status_label_map:
+                        status_label_map[first_status] = {"vanished": 0, "total": 0}
+                    
+                    status_label_map[first_status]["total"] += 1
+                    if label == "VANISHED":
+                        status_label_map[first_status]["vanished"] += 1
+                
+                for status, counts in status_label_map.items():
+                    if counts["total"] > 0:
+                        vanish_rate = counts["vanished"] / counts["total"]
+                        vanish_by_status.append(
+                            RateRow(group=status, rate=vanish_rate, n=counts["total"])
+                        )
+            except Exception as e:
+                logger.warning(f"Could not compute vanish_by_status: {e}")
+
+        # ========== Vanish rates by status_10min (FIX 2) ==========
+        vanish_by_status_10min = []
+        if total_labeled > 0 and first_sightings:
+            try:
+                cursor.execute(
+                    """
+                    SELECT trip_id, stop_id, label, first_status_10min
+                    FROM labels
+                    WHERE label IN ('SERVED', 'VANISHED') AND first_status_10min IS NOT NULL
+                    """
+                )
+                label_rows = cursor.fetchall()
+                
+                status_10min_map = {}  # status_name -> {vanished, total}
+                
+                for trip_id, stop_id, label, first_status_10min in label_rows:
+                    key = (trip_id, stop_id)
+                    if key not in first_sightings:
+                        continue
+                    
+                    if first_status_10min not in status_10min_map:
+                        status_10min_map[first_status_10min] = {"vanished": 0, "total": 0}
+                    
+                    status_10min_map[first_status_10min]["total"] += 1
+                    if label == "VANISHED":
+                        status_10min_map[first_status_10min]["vanished"] += 1
+                
+                for status, counts in status_10min_map.items():
+                    if counts["total"] > 0:
+                        vanish_rate = counts["vanished"] / counts["total"]
+                        vanish_by_status_10min.append(
+                            RateRow(group=status, rate=vanish_rate, n=counts["total"])
+                        )
+            except Exception as e:
+                logger.warning(f"Could not compute vanish_by_status_10min: {e}")
 
         # ========== Vanish rates by uncertainty ==========
-        # This requires joining with pred_snap, so we'll skip if no raw.db
         vanish_by_uncertainty = []
+        if total_labeled > 0 and first_sightings:
+            try:
+                cursor.execute(
+                    """
+                    SELECT trip_id, stop_id, label, has_vehicle
+                    FROM labels
+                    WHERE label IN ('SERVED', 'VANISHED')
+                    """
+                )
+                label_rows = cursor.fetchall()
+                
+                unc_vehicle_map = {}  # (unc_bucket, has_vehicle) -> {vanished, total}
+                
+                for trip_id, stop_id, label, has_vehicle_db in label_rows:
+                    key = (trip_id, stop_id)
+                    if key not in first_sightings:
+                        continue
+                    
+                    first = first_sightings[key]
+                    uncertainty = first["uncertainty"]
+                    # FIX 1: Use has_vehicle from labels table (measured at first sighting)
+                    has_vehicle = has_vehicle_db
+                    
+                    # Compute uncertainty bucket
+                    if uncertainty is None:
+                        unc_bucket = "missing"
+                    elif uncertainty < 300:
+                        unc_bucket = "<300"
+                    elif uncertainty == 300:
+                        unc_bucket = "300"
+                    elif uncertainty == 301:
+                        unc_bucket = "301"
+                    else:
+                        unc_bucket = ">301"
+                    
+                    key = (unc_bucket, has_vehicle)
+                    if key not in unc_vehicle_map:
+                        unc_vehicle_map[key] = {"vanished": 0, "total": 0}
+                    
+                    unc_vehicle_map[key]["total"] += 1
+                    if label == "VANISHED":
+                        unc_vehicle_map[key]["vanished"] += 1
+                
+                for (unc_bucket, has_vehicle), counts in unc_vehicle_map.items():
+                    if counts["total"] > 0:
+                        vanish_rate = counts["vanished"] / counts["total"]
+                        group_name = f"{unc_bucket}_vehicle={bool(has_vehicle)}"
+                        vanish_by_uncertainty.append(
+                            RateRow(group=group_name, rate=vanish_rate, n=counts["total"])
+                        )
+            except Exception as e:
+                logger.warning(f"Could not compute vanish_by_uncertainty: {e}")
 
         # ========== Vanish rates by route ==========
-        # This also requires pred_snap data; skip for now
         vanish_by_route = []
+        if total_labeled > 0 and first_sightings:
+            try:
+                cursor.execute(
+                    """
+                    SELECT trip_id, stop_id, label
+                    FROM labels
+                    WHERE label IN ('SERVED', 'VANISHED')
+                    """
+                )
+                label_rows = cursor.fetchall()
+                
+                route_map = {}  # route_id -> {vanished, total}
+                
+                for trip_id, stop_id, label in label_rows:
+                    key = (trip_id, stop_id)
+                    if key not in first_sightings:
+                        continue
+                    
+                    first = first_sightings[key]
+                    route_id = first["route_id"]
+                    
+                    if route_id is None:
+                        continue
+                    
+                    if route_id not in route_map:
+                        route_map[route_id] = {"vanished": 0, "total": 0}
+                    
+                    route_map[route_id]["total"] += 1
+                    if label == "VANISHED":
+                        route_map[route_id]["vanished"] += 1
+                
+                for route_id, counts in route_map.items():
+                    if counts["total"] > 0:
+                        vanish_rate = counts["vanished"] / counts["total"]
+                        vanish_by_route.append(
+                            RateRow(group=route_id, rate=vanish_rate, n=counts["total"])
+                        )
+            except Exception as e:
+                logger.warning(f"Could not compute vanish_by_route: {e}")
 
         # ========== ETA range hit rate ==========
-        # Skip for now; arrivals table may not exist
+        # Note: eta_range_hit requires arrival data (observed vs predicted ETA ranges)
+        # If arrivals table doesn't exist, leave n=0 (don't invent data)
         eta_range_hit_data = {
             "range_hit": 0,
             "single_eta_hit": 0,
@@ -423,6 +725,7 @@ def generate_findings(
             vanish_by_status=vanish_by_status,
             vanish_by_uncertainty=vanish_by_uncertainty,
             vanish_by_route=vanish_by_route,
+            vanish_by_status_10min=vanish_by_status_10min if vanish_by_status_10min else None,
             eta_range_hit=eta_range_hit_data,
             least_reliable_docks=least_reliable_docks,
             model=model_info,
