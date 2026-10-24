@@ -1,0 +1,115 @@
+{
+  "stop_id": "place-neast",
+  "stop_name": "Northeastern Entrance",
+  "generated_at": "2025-01-15T14:30:00Z",
+  "mode": "demo",
+  "data_age_sec": {
+    "trip_updates": 15,
+    "vehicle_positions": 10
+  },
+  "predictions": [
+    {
+      "route_id": "28",
+      "trip_id": "trip_28_001",
+      "headsign": "Ruggles Station",
+      "app_eta_min": 5.0,
+      "status": "confirmed",
+      "why": "Vehicle assigned and tracking well",
+      "reason_codes": ["vehicle_assigned", "on_schedule"],
+      "chance_it_arrives": 0.92,
+      "chance_basis": {
+        "method": "model",
+        "n": 510
+      },
+      "realistic_eta_min": [4.5, 5.8],
+      "evidence": {
+        "uncertainty": 60,
+        "vehicle_id": "vehicle_2001",
+        "location_age_sec": 10
+      },
+      "backup": null,
+      "outcome": null
+    },
+    {
+      "route_id": "28",
+      "trip_id": "trip_28_002",
+      "headsign": "Ruggles Station",
+      "app_eta_min": 18.0,
+      "status": "estimate",
+      "why": "No vehicle assigned; scheduled arrival",
+      "reason_codes": ["no_vehicle_assigned", "schedule_based"],
+      "chance_it_arrives": 0.71,
+      "chance_basis": {
+        "method": "empirical",
+        "n": 280
+      },
+      "realistic_eta_min": [15.5, 21.0],
+      "evidence": {
+        "uncertainty": 300,
+        "vehicle_id": null,
+        "location_age_sec": null
+      },
+      "backup": null,
+      "outcome": null
+    },
+    {
+      "route_id": "39",
+      "trip_id": "trip_39_001",
+      "headsign": "Forest Hills",
+      "app_eta_min": 8.5,
+      "status": "estimate",
+      "why": "Vehicle in-transit with minor delay",
+      "reason_codes": ["in_transit", "minor_delay"],
+      "chance_it_arrives": 0.84,
+      "chance_basis": {
+        "method": "empirical",
+        "n": 195
+      },
+      "realistic_eta_min": [7.0, 10.5],
+      "evidence": {
+        "uncertainty": 180,
+        "vehicle_id": "vehicle_2002",
+        "location_age_sec": 15
+      },
+      "backup": null,
+      "outcome": null
+    },
+    {
+      "route_id": "39",
+      "trip_id": "trip_39_002",
+      "headsign": "Forest Hills",
+      "app_eta_min": 28.0,
+      "status": "unreliable",
+      "why": "High vanish rate during evening peak; low confidence",
+      "reason_codes": ["high_vanish_rate", "peak_evening"],
+      "chance_it_arrives": 0.55,
+      "chance_basis": {
+        "method": "empirical",
+        "n": 110
+      },
+      "realistic_eta_min": [22.0, 35.0],
+      "evidence": {
+        "uncertainty": 350,
+        "vehicle_id": null,
+        "location_age_sec": null
+      },
+      "backup": {
+        "type": "bike",
+        "route_id": null,
+        "station_id": "station_mission",
+        "name": "Bluebikes Mission",
+        "status": "estimate",
+        "eta_min": 10.0,
+        "walk_min": 3.0,
+        "chance": 0.68
+      },
+      "outcome": null
+    }
+  ],
+  "hidden_count": 0,
+  "attribution": [
+    "Data: MBTA GTFS-realtime (MassDOT Developers License Agreement);",
+    "Bluebikes GBFS (Bluebikes Data License Agreement)."
+  ],
+  "disclaimer": "Unofficial. Not affiliated with or endorsed by MBTA, MassDOT or Bluebikes. For information only."
+}

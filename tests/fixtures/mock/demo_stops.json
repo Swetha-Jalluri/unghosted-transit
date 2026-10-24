@@ -1,0 +1,17 @@
+[
+  {
+    "stop_id": "place-haecl",
+    "name": "Harvard Ave at Lincoln",
+    "routes": ["1", "23"]
+  },
+  {
+    "stop_id": "place-neast",
+    "name": "Northeastern Entrance",
+    "routes": ["28", "39"]
+  },
+  {
+    "stop_id": "place-kencl",
+    "name": "Kendall/MIT",
+    "routes": ["66", "111"]
+  }
+]

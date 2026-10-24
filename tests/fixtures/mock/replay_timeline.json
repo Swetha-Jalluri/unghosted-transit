@@ -1,0 +1,158 @@
+[
+  {
+    "ts": 1737018000,
+    "stop_id": "place-haecl",
+    "predictions": [
+      {
+        "route_id": "1",
+        "trip_id": "trip_1_001",
+        "headsign": "Harvard Square",
+        "app_eta_min": 3.5,
+        "status": "confirmed",
+        "why": "Vehicle assigned and on route",
+        "reason_codes": ["vehicle_assigned", "on_schedule"],
+        "chance_it_arrives": 0.95,
+        "chance_basis": {"method": "model", "n": 450},
+        "realistic_eta_min": [3.0, 4.2],
+        "evidence": {"uncertainty": 45, "vehicle_id": "vehicle_1234", "location_age_sec": 8},
+        "backup": null,
+        "outcome": "served"
+      },
+      {
+        "route_id": "23",
+        "trip_id": "trip_23_001",
+        "headsign": "Ashmont Station",
+        "app_eta_min": 22.0,
+        "status": "unreliable",
+        "why": "High historical vanish rate",
+        "reason_codes": ["high_vanish_rate"],
+        "chance_it_arrives": 0.52,
+        "chance_basis": {"method": "empirical", "n": 142},
+        "realistic_eta_min": [18.0, 28.0],
+        "evidence": {"uncertainty": 301},
+        "backup": null,
+        "outcome": "vanished"
+      }
+    ]
+  },
+  {
+    "ts": 1737018060,
+    "stop_id": "place-haecl",
+    "predictions": [
+      {
+        "route_id": "1",
+        "trip_id": "trip_1_002",
+        "headsign": "Harvard Square",
+        "app_eta_min": 2.5,
+        "status": "confirmed",
+        "why": "Vehicle assigned and on route",
+        "reason_codes": ["vehicle_assigned", "on_schedule"],
+        "chance_it_arrives": 0.97,
+        "chance_basis": {"method": "model", "n": 450},
+        "realistic_eta_min": [2.0, 3.2],
+        "evidence": {"uncertainty": 40, "vehicle_id": "vehicle_1234", "location_age_sec": 8},
+        "backup": null,
+        "outcome": "served"
+      }
+    ]
+  },
+  {
+    "ts": 1737018120,
+    "stop_id": "place-neast",
+    "predictions": [
+      {
+        "route_id": "28",
+        "trip_id": "trip_28_001",
+        "headsign": "Ruggles Station",
+        "app_eta_min": 5.0,
+        "status": "confirmed",
+        "why": "Vehicle assigned and tracking well",
+        "reason_codes": ["vehicle_assigned", "on_schedule"],
+        "chance_it_arrives": 0.92,
+        "chance_basis": {"method": "model", "n": 510},
+        "realistic_eta_min": [4.5, 5.8],
+        "evidence": {"uncertainty": 60, "vehicle_id": "vehicle_2001", "location_age_sec": 10},
+        "backup": null,
+        "outcome": "served"
+      }
+    ]
+  },
+  {
+    "ts": 1737018180,
+    "stop_id": "place-kencl",
+    "predictions": [
+      {
+        "route_id": "66",
+        "trip_id": "trip_66_001",
+        "headsign": "Dudley Station",
+        "app_eta_min": 6.0,
+        "status": "confirmed",
+        "why": "Vehicle on route, tracking close to schedule",
+        "reason_codes": ["vehicle_assigned", "on_schedule"],
+        "chance_it_arrives": 0.96,
+        "chance_basis": {"method": "model", "n": 580},
+        "realistic_eta_min": [5.5, 6.7],
+        "evidence": {"uncertainty": 50, "vehicle_id": "vehicle_3001", "location_age_sec": 5},
+        "backup": null,
+        "outcome": "served"
+      },
+      {
+        "route_id": "111",
+        "trip_id": "trip_111_001",
+        "headsign": "Dudley Station",
+        "app_eta_min": 7.5,
+        "status": "confirmed",
+        "why": "Strong signal; vehicle close and stable",
+        "reason_codes": ["vehicle_assigned", "on_schedule"],
+        "chance_it_arrives": 0.94,
+        "chance_basis": {"method": "model", "n": 520},
+        "realistic_eta_min": [6.8, 8.5],
+        "evidence": {"uncertainty": 65, "vehicle_id": "vehicle_3002", "location_age_sec": 5},
+        "backup": null,
+        "outcome": "canceled"
+      }
+    ]
+  },
+  {
+    "ts": 1737018240,
+    "stop_id": "place-haecl",
+    "predictions": [
+      {
+        "route_id": "1",
+        "trip_id": "trip_1_003",
+        "headsign": "Harvard Square",
+        "app_eta_min": 1.5,
+        "status": "confirmed",
+        "why": "Vehicle assigned and on route",
+        "reason_codes": ["vehicle_assigned", "on_schedule"],
+        "chance_it_arrives": 0.98,
+        "chance_basis": {"method": "model", "n": 450},
+        "realistic_eta_min": [1.0, 2.2],
+        "evidence": {"uncertainty": 35, "vehicle_id": "vehicle_1234", "location_age_sec": 5},
+        "backup": null,
+        "outcome": "served"
+      }
+    ]
+  },
+  {
+    "ts": 1737018300,
+    "stop_id": "place-neast",
+    "predictions": [
+      {
+        "route_id": "39",
+        "trip_id": "trip_39_001",
+        "headsign": "Forest Hills",
+        "app_eta_min": 8.5,
+        "status": "estimate",
+        "why": "Vehicle in-transit with minor delay",
+        "reason_codes": ["in_transit", "minor_delay"],
+        "chance_it_arrives": 0.84,
+        "chance_basis": {"method": "empirical", "n": 195},
+        "realistic_eta_min": [7.0, 10.5],
+        "evidence": {"uncertainty": 180, "vehicle_id": "vehicle_2002", "location_age_sec": 15},
+        "backup": null,
+        "outcome": "open"
+      }
+    ]
+  }
+]

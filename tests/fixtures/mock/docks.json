@@ -1,0 +1,44 @@
+[
+  {
+    "station_id": "station_hub_001",
+    "name": "Bluebikes Harvard",
+    "lat": 42.3719,
+    "lon": -71.1159,
+    "app_bikes": 8,
+    "usable_bikes_estimate": [7, 9],
+    "chance_bike_on_arrival": 0.82,
+    "status": "confirmed",
+    "why": "Recent GBFS update; stable inventory",
+    "reason_codes": ["recent_update", "stable"],
+    "last_reported_age_sec": 45,
+    "drain_per_min": 0.15
+  },
+  {
+    "station_id": "station_mission",
+    "name": "Bluebikes Mission",
+    "lat": 42.3650,
+    "lon": -71.1066,
+    "app_bikes": 3,
+    "usable_bikes_estimate": [2, 4],
+    "chance_bike_on_arrival": 0.65,
+    "status": "estimate",
+    "why": "Data aged; moderate drain rate",
+    "reason_codes": ["aged_data", "moderate_drain"],
+    "last_reported_age_sec": 180,
+    "drain_per_min": 0.42
+  },
+  {
+    "station_id": "station_kencl",
+    "name": "Bluebikes Kendall",
+    "lat": 42.3626,
+    "lon": -71.0915,
+    "app_bikes": 12,
+    "usable_bikes_estimate": [11, 14],
+    "chance_bike_on_arrival": 0.91,
+    "status": "confirmed",
+    "why": "Fresh inventory; low drain",
+    "reason_codes": ["fresh_inventory", "low_drain"],
+    "last_reported_age_sec": 28,
+    "drain_per_min": 0.08
+  }
+]
