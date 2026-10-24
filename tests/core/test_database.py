@@ -24,9 +24,9 @@ def test_initialize_db_creates_tables(temp_db):
     conn = get_connection(temp_db)
     cursor = conn.cursor()
 
-    # Query sqlite_master for table names
+    # Query sqlite_master for table names (excluding sqlite_sequence)
     cursor.execute(
-        "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
+        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
     )
     tables = [row[0] for row in cursor.fetchall()]
     conn.close()

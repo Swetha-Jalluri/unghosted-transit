@@ -11,26 +11,26 @@ Build the core pipeline in order: feeds → collector → static_load → labele
   - Create tests/fixtures/ raw feed snapshots (trip_updates.json, vehicle_positions.json, stations.json) with real or realistic data.
   - _Requirements: 2.3, 1.7_
 
-- [ ] 2. Implement feeds.py
+- [x] 2. Implement feeds.py
   - Implement fetch_trip_updates(), fetch_vehicle_positions(), fetch_gbfs_discovery(), fetch_gbfs_status_info() with HTTPS requests.
   - Implement parse_trip_updates(), parse_vehicle_positions(), parse_gbfs() to flatten records.
   - Implement save_fixture_snapshot() to persist raw JSON to tests/fixtures/.
   - Log and skip records on parse error; never crash.
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7_
 
-- [ ] 2.1 Write property tests for feeds.py parsing
+- [x] 2.1 Write property tests for feeds.py parsing
   - **Property 1: Parse produces flat records** - For any valid feed JSON, parsing must produce a list of dicts with required fields.
   - **Property 2: Malformed records skipped** - For any feed with missing fields, parser must skip and never raise.
   - _Requirements: 1.2, 1.6_
 
-- [ ] 3. Implement collector.py
+- [x] 3. Implement collector.py
   - Implement initialize_db() to create schema in data/raw.db.
   - Implement poll_all_feeds() to fetch all feeds, filter by configured routes, insert into pred_snap/veh_snap/dock_snap.
   - Implement insert_pred_snap(), insert_veh_snap(), insert_dock_snap(), log_poll().
   - Implement retry logic with exponential backoff (max 3 retries, jitter); log failures; never crash.
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-- [ ] 3.1 Write property tests for collector.py route filtering
+- [x] 3.1 Write property tests for collector.py route filtering
   - **Property 1: Only configured routes inserted** - For any snapshot with mixed routes, only those in config.yaml routes must be inserted.
   - _Requirements: 2.2_
 
