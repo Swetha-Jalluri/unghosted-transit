@@ -56,7 +56,7 @@ def _load_json(filename: str) -> dict:
 
 
 def list_demo_stops() -> list[DemoStop]:
-    """List available demo stops from config.yaml with real names from static_load and routes from raw.db."""
+    """List available demo stops from config.yaml with real names from static_load and routes from sample.db or raw.db."""
     demo_stop_ids = CONFIG.get("demo_stops", [])
     
     # Try to get stops from static_load, fall back to stop_id
@@ -67,6 +67,13 @@ def list_demo_stops() -> list[DemoStop]:
     except Exception:
         pass
     
+    # Determine which db to read from
+    data_db = None
+    if SAMPLE_DB.exists():
+        data_db = SAMPLE_DB
+    elif RAW_DB.exists():
+        data_db = RAW_DB
+    
     demo_stops = []
     
     for stop_id in demo_stop_ids:
@@ -75,11 +82,11 @@ def list_demo_stops() -> list[DemoStop]:
         if not stop_name:
             stop_name = stop_id
         
-        # Get routes from raw.db pred_snap for this stop
+        # Get routes from database pred_snap for this stop
         routes = set()
-        if RAW_DB.exists():
+        if data_db:
             try:
-                conn = get_connection(RAW_DB)
+                conn = get_connection(data_db)
                 cursor = conn.cursor()
                 cursor.execute(
                     "SELECT DISTINCT route_id FROM pred_snap WHERE stop_id = ?",
@@ -123,12 +130,19 @@ def get_bus_trust(
         NotFound: If stop_id has no predictions in latest poll.
         LiveDataUnavailable: If live mode and feeds fail.
     """
-    # Demo mode: read latest snapshot from raw.db or fall back to mocks
+    # Demo mode: read latest snapshot from sample.db (or raw.db if sample.db missing), then mocks
     if mode == "demo":
-        # Try to read from raw.db first
-        if RAW_DB.exists():
+        # Determine which db to read from: sample.db if it exists, else raw.db, else mocks
+        demo_db = None
+        if SAMPLE_DB.exists():
+            demo_db = SAMPLE_DB
+        elif RAW_DB.exists():
+            demo_db = RAW_DB
+        
+        # Try to read from selected database
+        if demo_db:
             try:
-                conn = get_connection(RAW_DB)
+                conn = get_connection(demo_db)
                 cursor = conn.cursor()
                 
                 # Get latest poll timestamp and data ages
@@ -402,21 +416,29 @@ def get_nearby_docks(
 def get_findings() -> Findings:
     """Get findings and model calibration.
     
-    When raw.db exists: generates findings from real logged data (is_placeholder=false).
-    When raw.db missing: uses mock findings (is_placeholder=true).
+    Preference: sample.db (if exists) > raw.db (if exists) > mock findings.json.
     
-    Never returns cached artifacts/findings.json when raw.db exists.
-    Always writes real findings to artifacts/findings.json when raw.db exists.
+    When sample.db or raw.db exists: generates findings from real logged data (is_placeholder=false).
+    When neither exists: uses mock findings (is_placeholder=true).
+    
+    Always writes real findings to artifacts/findings.json when data exists.
     """
     from core.findings import generate_findings, save_findings
     
-    # If raw.db exists, always compute and return real findings
-    if RAW_DB.exists():
+    # Determine which db to read from
+    data_db = None
+    if SAMPLE_DB.exists():
+        data_db = SAMPLE_DB
+    elif RAW_DB.exists():
+        data_db = RAW_DB
+    
+    # If sample.db or raw.db exists, always compute and return real findings
+    if data_db:
         findings = generate_findings(is_placeholder=False)
         save_findings(findings)
         return findings
     
-    # raw.db missing: fall back to mock (is_placeholder=true)
+    # Neither db exists: fall back to mock (is_placeholder=true)
     try:
         data = _load_json("findings.json")
         findings = Findings(**data)
@@ -430,6 +452,8 @@ def get_findings() -> Findings:
 def get_health() -> Health:
     """Get system health snapshot from poll_log (read-only).
     
+    Preference: sample.db (if exists) > raw.db (if exists) > mock health.json.
+    
     Returns health status including:
     - Last poll timestamp
     - Polls in last hour
@@ -439,8 +463,8 @@ def get_health() -> Health:
     - Available modes
     - Model method
     
-    Computes only from data/raw.db poll_log and row counts (read-only).
-    Falls back to mock health.json only if raw.db does not exist.
+    Computes only from data/sample.db or raw.db poll_log and row counts (read-only).
+    Falls back to mock health.json only if neither db exists.
     """
     health_data = {
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
@@ -453,10 +477,17 @@ def get_health() -> Health:
         "model_method": "placeholder",  # Until model training exists
     }
     
-    # Try to read from raw.db (read-only)
-    if RAW_DB.exists():
+    # Determine which db to read from
+    data_db = None
+    if SAMPLE_DB.exists():
+        data_db = SAMPLE_DB
+    elif RAW_DB.exists():
+        data_db = RAW_DB
+    
+    # Try to read from selected database (read-only)
+    if data_db:
         try:
-            conn = get_connection(RAW_DB)
+            conn = get_connection(data_db)
             cursor = conn.cursor()
             
             # Get last poll timestamp and recent poll count
