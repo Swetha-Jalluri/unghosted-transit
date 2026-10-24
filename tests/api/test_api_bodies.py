@@ -58,6 +58,7 @@ from api.main import create_app
 from app.settings import SETTINGS
 from core import service
 from core.contracts import DockResult, Findings
+from tests.api.conftest import fixed_bus_service, fixed_demo_stops
 
 # Route paths come from Settings (no hardcoded paths).
 ROUTES = SETTINGS.api_routes
@@ -118,22 +119,26 @@ class TestBareRouteBodiesEqualModel:
     def test_bus_trust_body_equals_model(self):
         """bus-trust body equals the ``BusTrustResponse`` the Service returns.
 
-        Driven by every real demo stop id from ``list_demo_stops()`` so the
-        assertion never hardcodes an id.
+        A's real demo Service raises ``NotFound`` for bus-trust in demo mode, so
+        the bus content comes from fixed contract models installed by
+        ``fixed_bus_service``: both the direct Service call and the HTTP route
+        then resolve to the same fixed ``BusTrustResponse``. Driven by every
+        fixed demo stop id so the assertion never hardcodes an id.
         """
-        stops = service.list_demo_stops()
-        assert stops, "demo stops fixture is empty"
-        with _client() as client:
-            for stop in stops:
-                expected = service.get_bus_trust(stop.stop_id, mode="demo")
-                resp = client.get(
-                    ROUTES["bus_trust"],
-                    params={"stop_id": stop.stop_id, "mode": "demo"},
-                )
-                assert resp.status_code == 200, resp.text
-                assert resp.json() == _json_of(expected), (
-                    f"bus-trust body differs from model for {stop.stop_id}"
-                )
+        with fixed_bus_service():
+            stops = fixed_demo_stops()
+            assert stops, "fixed demo stops are empty"
+            with _client() as client:
+                for stop in stops:
+                    expected = service.get_bus_trust(stop.stop_id, mode="demo")
+                    resp = client.get(
+                        ROUTES["bus_trust"],
+                        params={"stop_id": stop.stop_id, "mode": "demo"},
+                    )
+                    assert resp.status_code == 200, resp.text
+                    assert resp.json() == _json_of(expected), (
+                        f"bus-trust body differs from model for {stop.stop_id}"
+                    )
 
     def test_dock_trust_body_equals_model(self):
         """dock-trust body equals the ``DockTrustResponse`` the Service returns.

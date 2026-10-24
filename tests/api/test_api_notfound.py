@@ -86,10 +86,11 @@ def _assert_not_found(response, bad_id: str) -> None:
     assert bad_id in body["message"], (
         f"id {bad_id!r} not named in message {body['message']!r}"
     )
-    # Never a 500 / stack trace: no traceback markers in the body text.
+    # Never a 500 / stack trace: no traceback markers in the body text, and the
+    # error code (not the whole body, which echoes the id) is not internal_error.
     text = response.text
     assert "Traceback" not in text, f"stack trace leaked: {text}"
-    assert "internal_error" not in text, f"mapped to 500: {text}"
+    assert body["error"] != "internal_error", f"mapped to 500: {text}"
 
 
 class TestBusTrustUnknownId:

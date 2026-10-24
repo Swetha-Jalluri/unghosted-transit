@@ -36,10 +36,13 @@ from mcp_server.tools import (
     nearby_docks,
     todays_findings,
 )
+from tests.mcp.conftest import fixed_bus_service, fixed_demo_stops
 
-# Real demo ids drawn from the Service, so the property runs over genuine demo
-# data rather than guessed ids (no hardcoding of ids in the test).
-_DEMO_STOP_IDS = [stop.stop_id for stop in service.list_demo_stops()]
+# Fixed demo stop ids for the bus property. A's real demo Service raises
+# ``NotFound`` for bus-trust in demo mode, so the bus tool is exercised against
+# fixed contract models installed by ``fixed_bus_service``; ids are read from
+# that fixed stop list (no hardcoded ids in the test).
+_DEMO_STOP_IDS = [stop.stop_id for stop in fixed_demo_stops()]
 
 # A valid station id and its coordinate, discovered through the Service exactly
 # as the task prescribes: ask get_nearby_docks for the nearest dock and reuse
@@ -88,9 +91,12 @@ class TestBusTrustLegal:
         The age map must equal the response's own ``data_age_sec`` (bus tools
         forward ``BusTrustResponse.data_age_sec`` unchanged).
         """
-        result = check_bus_trust(stop_id=stop_id, mode="demo")
-        _assert_legal(result)
-        expected_age = dict(service.get_bus_trust(stop_id, mode="demo").data_age_sec)
+        with fixed_bus_service():
+            result = check_bus_trust(stop_id=stop_id, mode="demo")
+            _assert_legal(result)
+            expected_age = dict(
+                service.get_bus_trust(stop_id, mode="demo").data_age_sec
+            )
         assert result["data_age_sec"] == expected_age, (
             f"bus data_age_sec should match the service response, "
             f"got {result['data_age_sec']!r} vs {expected_age!r}"

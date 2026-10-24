@@ -21,17 +21,17 @@ the same ``core.service`` module object this test holds, so attributes patched
 on ``core.service`` *before* ``run()`` are seen inside the app. ``stub_service``
 patches named attributes and always restores them.
 
-Why ``list_demo_stops`` is always stubbed
------------------------------------------
+Why the Service is stubbed with fixed contract models
+-----------------------------------------------------
 ``app.rider`` loads the stop picker via ``calls.call(service.list_demo_stops,
-mode="demo")``, which forwards ``mode=`` to the Service function. The real
-``core.service.list_demo_stops`` takes no ``mode`` parameter, so the live call
-raises and the picker shows "Stops are unavailable". To exercise the Rider cards
-with real demo data we wrap ``list_demo_stops`` in a shim that tolerates (and
-ignores) the extra kwargs and returns the real fixture stops. The shim adds no
-fake data; it only absorbs the kwarg the view passes. (This mismatch is a real
-defect in ``app/rider.py`` / ``app/calls.py`` worth a follow-up; it is out of
-scope for this test task, which must not edit app source.)
+mode="demo")`` and then renders ``get_bus_trust(stop_id, mode="demo")``. A's
+real demo Service exposes its own live demo stops and raises ``NotFound`` for
+bus-trust in demo mode, so a content/shape test must not depend on it. Instead
+these tests install fixed, valid contract models (``DemoStop`` list and a
+``BusTrustResponse`` built in :func:`_fixed_bus_response`) over ``core.service``
+and assert against those fixtures, reading ids/names back from them rather than
+hardcoding any value. ``list_demo_stops`` is wrapped in a shim that tolerates
+(and ignores) the ``mode=`` kwarg the view forwards.
 """
 from __future__ import annotations
 
@@ -46,6 +46,7 @@ from core.contracts import (
     BusPrediction,
     BusTrustResponse,
     ChanceBasis,
+    DemoStop,
     Evidence,
     LiveDataUnavailable,
     NotFound,
@@ -57,28 +58,86 @@ APP_PATH = str(Path(__file__).resolve().parents[2] / "streamlit_app.py")
 
 
 # ---------------------------------------------------------------------------
+# Fixed contract-model demo data (not A's live demo data).
+#
+# Ids/names live only here as fixed test data; assertions read them back from
+# these fixtures instead of hardcoding literals.
+# ---------------------------------------------------------------------------
+_FIXED_DEMO_STOPS = (
+    DemoStop(stop_id="fixed-stop-a", name="Fixed Stop A", routes=["1", "23"]),
+    DemoStop(stop_id="fixed-stop-b", name="Fixed Stop B", routes=["39"]),
+)
+
+# The default stop the Rider picker lands on is the first option; keep a handle
+# so tests can rebuild the exact response the page renders for it.
+_DEFAULT_STOP = _FIXED_DEMO_STOPS[0]
+
+
+def _fixed_demo_stops(*_args, **_kwargs):
+    """Return fresh copies of the fixed demo stops, ignoring any ``mode=`` kwarg."""
+    return [s.model_copy(deep=True) for s in _FIXED_DEMO_STOPS]
+
+
+def _fixed_bus_response(stop_id: str, mode: str = "demo", **_kwargs) -> BusTrustResponse:
+    """Build a fixed, valid ``BusTrustResponse`` with four displayable predictions.
+
+    Statuses are all displayable (confirmed/estimate/unreliable) so the Rider
+    renders one card per prediction; ``hidden_count`` is a bare number. Carries
+    the Service's own legal text so the page's disclaimer/attribution render.
+    """
+    specs = [
+        ("1", "confirmed", 0.9),
+        ("23", "estimate", 0.6),
+        ("39", "unreliable", 0.3),
+        ("57", "estimate", 0.5),
+    ]
+    predictions = [
+        BusPrediction(
+            route_id=route,
+            trip_id=f"fixed-trip-{i}",
+            headsign="Downtown",
+            app_eta_min=float(3 + i),
+            status=status,
+            why="Fixed prediction for the Rider view test.",
+            reason_codes=["vehicle_reporting"],
+            chance_it_arrives=chance,
+            chance_basis=ChanceBasis(method="empirical", n=30),
+            realistic_eta_min=(float(2 + i), float(5 + i)),
+            evidence=Evidence(uncertainty=60),
+            backup=None,
+            outcome=None,
+        )
+        for i, (route, status, chance) in enumerate(specs)
+    ]
+    return BusTrustResponse(
+        stop_id=stop_id,
+        stop_name=f"Stop {stop_id}",
+        generated_at="2026-01-01T00:00:00Z",
+        mode=mode,
+        data_age_sec={"trip_updates": 10, "vehicle_positions": 5},
+        predictions=predictions,
+        hidden_count=0,
+        attribution=service.ATTRIBUTION,
+        disclaimer=service.DISCLAIMER,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-def _real_list_demo_stops(*_args, **_kwargs):
-    """Return the real demo stops, tolerating the ``mode=`` kwarg the view sends.
-
-    Imported lazily off the module each call so it still reflects the real
-    fixture contents and never hardcodes stop data.
-    """
-    return service.__dict__["_ORIG_list_demo_stops"]()
-
-
 @contextmanager
 def stub_service(**overrides):
     """Temporarily replace attributes on ``core.service``; always restore them.
 
-    ``list_demo_stops`` is always wrapped so the Rider stop picker populates;
-    callers may override any other Service function (e.g. ``get_bus_trust``).
+    ``list_demo_stops`` and ``get_bus_trust`` default to the fixed contract
+    models above so the Rider renders deterministic data offline; callers may
+    override either (or any other Service function).
     """
-    # Snapshot the genuine list_demo_stops once so the shim can delegate to it.
-    service.__dict__.setdefault("_ORIG_list_demo_stops", service.list_demo_stops)
-
-    patched = {"list_demo_stops": _real_list_demo_stops, **overrides}
+    patched = {
+        "list_demo_stops": _fixed_demo_stops,
+        "get_bus_trust": _fixed_bus_response,
+        **overrides,
+    }
     saved = {name: getattr(service, name) for name in patched}
     try:
         for name, fn in patched.items():
@@ -179,13 +238,15 @@ class TestDefaultModeDemo:
 # ---------------------------------------------------------------------------
 class TestColumnsAndCards:
     def test_stop_picker_is_populated_from_demo_stops(self):
-        # R1.1: picker shows each stop's name and its routes.
+        # R1.1: picker shows each stop's name and its routes. Options are
+        # derived from the fixed demo stops, not hardcoded strings.
         at = run_rider()
         stop_box = next(s for s in at.selectbox if s.label == "Stop")
-        # The real demo fixtures carry these three stops.
-        assert "Harvard Ave at Lincoln (1, 23)" in stop_box.options
-        assert any("Northeastern" in opt for opt in stop_box.options)
-        assert any("Kendall" in opt for opt in stop_box.options)
+        for stop in _FIXED_DEMO_STOPS:
+            expected = f"{stop.name} ({', '.join(stop.routes)})"
+            assert expected in stop_box.options, (
+                f"picker missing option {expected!r}; got {list(stop_box.options)!r}"
+            )
 
     def test_both_columns_render(self):
         at = run_rider()
@@ -194,9 +255,10 @@ class TestColumnsAndCards:
         assert any("Unghosted" in t for t in texts)
 
     def test_one_card_per_displayable_prediction(self):
-        # The default stop (place-haecl) has 4 displayable predictions.
+        # The default stop renders the fixed response (four displayable
+        # predictions). The expected count is derived from that fixture.
         at = run_rider()
-        resp = service.get_bus_trust("place-haecl", mode="demo")
+        resp = _fixed_bus_response(_DEFAULT_STOP.stop_id, mode="demo")
         from app.logic import is_displayable
 
         displayable = [p for p in resp.predictions if is_displayable(p.status)]
@@ -211,7 +273,7 @@ class TestColumnsAndCards:
 
     def test_left_column_lines_match_prediction_routes(self):
         at = run_rider()
-        resp = service.get_bus_trust("place-haecl", mode="demo")
+        resp = _fixed_bus_response(_DEFAULT_STOP.stop_id, mode="demo")
         from app.logic import is_displayable
 
         displayable = [p for p in resp.predictions if is_displayable(p.status)]
@@ -272,13 +334,12 @@ class TestNotFound:
 class TestLiveFallback:
     def test_live_unavailable_falls_back_to_demo(self):
         # Demo mode never raises LiveDataUnavailable, so the fallback path is
-        # verified with a stub: raise only for live, return demo data otherwise.
-        orig = service.get_bus_trust
-
+        # verified with a stub: raise only for live, return the fixed demo
+        # response otherwise.
         def stub_bus(stop_id, mode="demo", **kwargs):
             if mode == "live":
                 raise LiveDataUnavailable("no live feed")
-            return orig(stop_id, mode="demo", **kwargs)
+            return _fixed_bus_response(stop_id, mode="demo")
 
         with stub_service(get_bus_trust=stub_bus):
             at = AppTest.from_file(APP_PATH)

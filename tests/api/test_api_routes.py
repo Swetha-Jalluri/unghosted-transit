@@ -25,15 +25,22 @@ import pytest
 
 from app.settings import SETTINGS
 from core import service
+from tests.api.conftest import fixed_bus_service, fixed_demo_stops
 
 # Route paths come from Settings (no hardcoded paths).
 ROUTES = SETTINGS.api_routes
 
 
 def _first_demo_stop_id() -> str:
-    """A real demo ``stop_id`` from the Service (demo data), not a literal."""
-    stops = service.list_demo_stops()
-    assert stops, "demo data must expose at least one stop for the example test"
+    """A fixed ``stop_id`` from the patched bus Service, not a literal.
+
+    Bus content is served from fixed contract models (see
+    ``conftest.fixed_bus_service``) because A's real demo Service raises
+    ``NotFound`` for bus-trust in demo mode. The id is read back from the fixed
+    stop list rather than hardcoded here.
+    """
+    stops = fixed_demo_stops()
+    assert stops, "fixed demo stops must expose at least one stop"
     return stops[0].stop_id
 
 
@@ -54,7 +61,10 @@ class TestBusTrustRoute:
 
     def test_bus_trust_example(self, client):
         stop_id = _first_demo_stop_id()
-        resp = client.get(ROUTES["bus_trust"], params={"stop_id": stop_id, "mode": "demo"})
+        with fixed_bus_service():
+            resp = client.get(
+                ROUTES["bus_trust"], params={"stop_id": stop_id, "mode": "demo"}
+            )
         assert resp.status_code == 200, resp.text
         body = resp.json()
         assert body["stop_id"] == stop_id

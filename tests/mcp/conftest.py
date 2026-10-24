@@ -19,6 +19,14 @@ from dataclasses import dataclass, field
 import pytest
 
 from core import service
+from core.contracts import (
+    BusPrediction,
+    BusTrustResponse,
+    ChanceBasis,
+    DemoStop,
+    Evidence,
+    NotFound,
+)
 
 # The service functions the MCP tools delegate to. These are the only names
 # ``mcp_server.tools`` calls, so the spy needs to cover exactly these.
@@ -79,6 +87,97 @@ def service_spy(monkeypatch: pytest.MonkeyPatch) -> ServiceSpy:
         monkeypatch.setattr(service, func_name, _make_wrapper(func_name, original))
 
     return spy
+
+
+# ---------------------------------------------------------------------------
+# Fixed contract-model bus data.
+#
+# A's real demo Service answers ``get_bus_trust`` with its own live demo stops
+# and raises ``NotFound`` for them in demo mode, so content/shape tests must not
+# depend on it. These helpers build fixed ``DemoStop`` / ``BusTrustResponse``
+# contract models and a context manager that monkeypatches ``core.service`` to
+# serve them. Ids/names live only here (fixed test data), never asserted as
+# literals in test bodies: tests read them back from these builders.
+# ---------------------------------------------------------------------------
+
+_FIXED_DEMO_STOPS = (
+    DemoStop(stop_id="fixed-stop-a", name="Fixed Stop A", routes=["1", "23"]),
+    DemoStop(stop_id="fixed-stop-b", name="Fixed Stop B", routes=["39"]),
+)
+
+
+def fixed_demo_stops() -> list[DemoStop]:
+    """Return a fresh copy of the fixed demo stops the patched Service serves."""
+    return [s.model_copy(deep=True) for s in _FIXED_DEMO_STOPS]
+
+
+def make_bus_trust_response(stop_id: str, mode: str = "demo") -> BusTrustResponse:
+    """Build a fixed, valid ``BusTrustResponse`` for ``stop_id``.
+
+    Carries the Service's own legal text (``service.ATTRIBUTION`` list and
+    ``service.DISCLAIMER``) and a non-empty ``data_age_sec`` so the legal-text
+    and data-age assertions hold without hardcoding any string.
+    """
+    predictions = [
+        BusPrediction(
+            route_id="1",
+            trip_id="fixed-trip-1",
+            headsign="Downtown",
+            app_eta_min=5.0,
+            status="confirmed",
+            why="Vehicle is in transit and reporting.",
+            reason_codes=["vehicle_reporting"],
+            chance_it_arrives=0.92,
+            chance_basis=ChanceBasis(method="empirical", n=40),
+            realistic_eta_min=(4.0, 7.0),
+            evidence=Evidence(uncertainty=60, vehicle_id="veh-1", location_age_sec=15),
+            backup=None,
+            outcome=None,
+        ),
+    ]
+    return BusTrustResponse(
+        stop_id=stop_id,
+        stop_name=f"Stop {stop_id}",
+        generated_at="2026-01-01T00:00:00Z",
+        mode=mode,
+        data_age_sec={"trip_updates": 12, "vehicle_positions": 8},
+        predictions=predictions,
+        hidden_count=1,
+        attribution=list(service.ATTRIBUTION),
+        disclaimer=service.DISCLAIMER,
+    )
+
+
+@contextmanager
+def fixed_bus_service():
+    """Monkeypatch ``core.service`` bus functions to serve fixed contract models.
+
+    ``list_demo_stops`` returns :func:`fixed_demo_stops`; ``get_bus_trust``
+    returns :func:`make_bus_trust_response` for a known fixed stop id and raises
+    ``NotFound`` otherwise. Other Service functions are untouched, so dock /
+    findings tools keep using A's real demo data. Originals restored on exit.
+    """
+    known = {s.stop_id for s in _FIXED_DEMO_STOPS}
+    originals = {
+        "list_demo_stops": service.list_demo_stops,
+        "get_bus_trust": service.get_bus_trust,
+    }
+
+    def _list_demo_stops(*_args, **_kwargs):
+        return fixed_demo_stops()
+
+    def _get_bus_trust(stop_id, mode="demo", limit=5, at_ts=None):
+        if stop_id not in known:
+            raise NotFound(f"Stop {stop_id} not found")
+        return make_bus_trust_response(stop_id, mode=mode)
+
+    service.list_demo_stops = _list_demo_stops
+    service.get_bus_trust = _get_bus_trust
+    try:
+        yield
+    finally:
+        for name, fn in originals.items():
+            setattr(service, name, fn)
 
 
 @contextmanager

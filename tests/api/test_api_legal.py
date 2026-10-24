@@ -37,7 +37,7 @@ from hypothesis import strategies as st
 
 from app.settings import ATTRIBUTION, DISCLAIMER, SETTINGS
 from core import service
-from tests.api.conftest import spied_client
+from tests.api.conftest import fixed_bus_service, fixed_demo_stops, spied_client
 
 # Route paths come from Settings (no hardcoded paths).
 ROUTES = SETTINGS.api_routes
@@ -48,8 +48,13 @@ FINDINGS = ROUTES["findings"]
 
 
 def _demo_stop_ids() -> list[str]:
-    """Real demo stop ids that bus-trust can answer offline."""
-    return [stop.stop_id for stop in service.list_demo_stops()]
+    """Fixed demo stop ids that bus-trust answers offline.
+
+    A's real demo Service raises ``NotFound`` for bus-trust in demo mode, so the
+    bus legal-text check runs against fixed contract models installed per
+    request by ``fixed_bus_service``. Ids are read from that fixed stop list.
+    """
+    return [stop.stop_id for stop in fixed_demo_stops()]
 
 
 def _demo_station_ids() -> list[str]:
@@ -123,8 +128,12 @@ class TestBusTrustCarriesLegalText:
     @hyp_settings(max_examples=100)
     @given(stop_id=st.sampled_from(_STOP_IDS))
     def test_bus_trust_legal_text(self, stop_id):
-        """A valid demo bus-trust request carries ATTRIBUTION and DISCLAIMER."""
-        with spied_client() as (client, _spy):
+        """A valid demo bus-trust request carries ATTRIBUTION and DISCLAIMER.
+
+        Bus content is served from a fixed ``BusTrustResponse`` (see
+        ``fixed_bus_service``), which carries the Service's own legal text.
+        """
+        with spied_client() as (client, _spy), fixed_bus_service():
             resp = client.get(BUS_TRUST, params={"stop_id": stop_id})
         assert resp.status_code == 200, resp.text
         body = resp.json()
