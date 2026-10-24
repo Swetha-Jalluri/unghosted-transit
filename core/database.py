@@ -17,9 +17,10 @@ def initialize_db(db_path: str | Path) -> None:
     conn = get_connection(db_path)
     cursor = conn.cursor()
 
-    # pred_snap: bus predictions/trip updates
+    # pred_snap: bus predictions/trip updates (append-only, one row per poll per prediction)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS pred_snap (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             ts INTEGER NOT NULL,
             stop_id TEXT NOT NULL,
             route_id TEXT NOT NULL,
@@ -29,35 +30,35 @@ def initialize_db(db_path: str | Path) -> None:
             schedule_relationship TEXT,
             revenue INTEGER,
             headsign TEXT,
-            PRIMARY KEY (ts, trip_id, stop_id)
+            stop_sequence INTEGER
         )
     """)
 
-    # veh_snap: vehicle positions
+    # veh_snap: vehicle positions (append-only, one row per poll per vehicle)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS veh_snap (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             ts INTEGER NOT NULL,
             trip_id TEXT NOT NULL,
             route_id TEXT NOT NULL,
             stop_sequence INTEGER,
             current_status TEXT,
             vehicle_timestamp INTEGER,
-            vehicle_id TEXT,
-            PRIMARY KEY (ts, trip_id)
+            vehicle_id TEXT
         )
     """)
 
-    # dock_snap: bike dock status
+    # dock_snap: bike dock status (append-only, one row per poll per dock)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS dock_snap (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             ts INTEGER NOT NULL,
             station_id TEXT NOT NULL,
             app_bikes INTEGER,
             num_docks_available INTEGER,
             is_renting INTEGER,
             is_installed INTEGER,
-            last_reported INTEGER,
-            PRIMARY KEY (ts, station_id)
+            last_reported INTEGER
         )
     """)
 
@@ -86,6 +87,20 @@ def initialize_db(db_path: str | Path) -> None:
         )
     """)
 
+    # arrivals: observed arrival times and ETA errors for SERVED labels
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS arrivals (
+            trip_id TEXT NOT NULL,
+            stop_id TEXT NOT NULL,
+            actual_arrival_ts INTEGER,
+            predicted_arrival_ts INTEGER,
+            eta_error_min REAL,
+            ts_recorded INTEGER,
+            PRIMARY KEY (trip_id, stop_id),
+            FOREIGN KEY (trip_id, stop_id) REFERENCES labels(trip_id, stop_id)
+        )
+    """)
+
     conn.commit()
     conn.close()
 
@@ -95,7 +110,7 @@ def clear_db(db_path: str | Path) -> None:
     conn = get_connection(db_path)
     cursor = conn.cursor()
 
-    for table in ["pred_snap", "veh_snap", "dock_snap", "poll_log", "labels"]:
+    for table in ["pred_snap", "veh_snap", "dock_snap", "poll_log", "labels", "arrivals"]:
         cursor.execute(f"DELETE FROM {table}")
 
     conn.commit()
