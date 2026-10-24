@@ -416,12 +416,11 @@ def get_nearby_docks(
 def get_findings() -> Findings:
     """Get findings and model calibration.
     
-    Preference: sample.db (if exists) > raw.db (if exists) > mock findings.json.
+    Preference: sample.db (if exists) > raw.db (if exists) > artifacts/findings.json > mocks > placeholder.
     
     When sample.db or raw.db exists: generates findings from real logged data (is_placeholder=false).
-    When neither exists: uses mock findings (is_placeholder=true).
-    
-    Always writes real findings to artifacts/findings.json when data exists.
+    When neither exists: uses precomputed artifacts/findings.json if available.
+    When that's missing too: uses mock findings (is_placeholder=true).
     """
     from core.findings import generate_findings, save_findings
     
@@ -438,7 +437,18 @@ def get_findings() -> Findings:
         save_findings(findings)
         return findings
     
-    # Neither db exists: fall back to mock (is_placeholder=true)
+    # Neither db exists: try precomputed artifacts/findings.json
+    artifacts_findings = REPO_ROOT / "artifacts" / "findings.json"
+    if artifacts_findings.exists():
+        try:
+            with open(artifacts_findings) as f:
+                data = json.load(f)
+            findings = Findings(**data)
+            return findings
+        except (json.JSONDecodeError, Exception):
+            pass
+    
+    # Fall back to mock findings.json (is_placeholder=true)
     try:
         data = _load_json("findings.json")
         findings = Findings(**data)
