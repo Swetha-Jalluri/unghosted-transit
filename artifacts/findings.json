@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-10-24T21:04:02Z",
+  "sample_label": "SERVED",
+  "window": {
+    "start": 1792870256,
+    "end": 1792875816
+  },
+  "totals": {
+    "labeled": 3068,
+    "served": 2859,
+    "vanished": 105,
+    "canceled": 0
+  },
+  "vanish_by_status": [
+    {
+      "group": "VANISHED",
+      "rate": 0.03422425032594524,
+      "n": 105
+    }
+  ],
+  "vanish_by_uncertainty": [],
+  "vanish_by_route": [],
+  "eta_range_hit": {
+    "range_hit": 0,
+    "single_eta_hit": 0,
+    "n": 0
+  },
+  "least_reliable_docks": [],
+  "model": {
+    "method": "empirical",
+    "auc": null,
+    "brier": null,
+    "n_labels": 3068
+  },
+  "calibration": [],
+  "eval": {
+    "holdout_window": null,
+    "n_train": 3068,
+    "n_test": 0
+  },
+  "is_placeholder": false
+}

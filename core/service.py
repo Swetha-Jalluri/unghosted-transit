@@ -5,9 +5,7 @@ import time
 import yaml
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
-from core.backup import select_backups
 from core.bus_trust import compute_realistic_eta_range, compute_status_and_why
 from core.contracts import (
     BusPrediction,
@@ -108,7 +106,7 @@ def list_demo_stops() -> list[DemoStop]:
 
 
 def get_bus_trust(
-    stop_id: str, mode: str = "demo", limit: int = 5, at_ts: Optional[int] = None
+    stop_id: str, mode: str = "demo", limit: int = 5, at_ts: int | None = None
 ) -> BusTrustResponse:
     """Get bus trust predictions for a stop.
     
@@ -339,7 +337,7 @@ def get_bus_trust(
 
 
 def get_dock_trust(
-    station_id: str, walk_min: float = 5, mode: str = "demo", at_ts: Optional[int] = None
+    station_id: str, walk_min: float = 5, mode: str = "demo", at_ts: int | None = None
 ) -> DockTrustResponse:
     """Get dock trust for a specific station."""
     # For demo mode, use mock docks data
@@ -402,10 +400,31 @@ def get_nearby_docks(
 
 
 def get_findings() -> Findings:
-    """Get findings and model calibration."""
-    data = _load_json("findings.json")
-    findings = Findings(**data)
-    return findings
+    """Get findings and model calibration.
+    
+    When raw.db exists: generates findings from real logged data (is_placeholder=false).
+    When raw.db missing: uses mock findings (is_placeholder=true).
+    
+    Never returns cached artifacts/findings.json when raw.db exists.
+    Always writes real findings to artifacts/findings.json when raw.db exists.
+    """
+    from core.findings import generate_findings, save_findings
+    
+    # If raw.db exists, always compute and return real findings
+    if RAW_DB.exists():
+        findings = generate_findings(is_placeholder=False)
+        save_findings(findings)
+        return findings
+    
+    # raw.db missing: fall back to mock (is_placeholder=true)
+    try:
+        data = _load_json("findings.json")
+        findings = Findings(**data)
+        return findings
+    except FileNotFoundError:
+        # If no mock either, generate empty findings as placeholder
+        findings = generate_findings(is_placeholder=True)
+        return findings
 
 
 def get_health() -> Health:

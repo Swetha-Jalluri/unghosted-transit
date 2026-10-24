@@ -221,5 +221,6 @@ __marimo__/
 
 .env
 data/raw.db
+data/labels.db
 .venv/
 .vscode/
