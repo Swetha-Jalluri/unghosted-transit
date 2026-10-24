@@ -24,14 +24,14 @@ def test_initialize_db_creates_tables(temp_db):
     conn = get_connection(temp_db)
     cursor = conn.cursor()
 
-    # Query sqlite_master for table names
+    # Query sqlite_master for table names (excluding sqlite_sequence)
     cursor.execute(
-        "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
+        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
     )
     tables = [row[0] for row in cursor.fetchall()]
     conn.close()
 
-    expected_tables = ["dock_snap", "labels", "poll_log", "pred_snap", "veh_snap"]
+    expected_tables = ["arrivals", "dock_snap", "labels", "poll_log", "pred_snap", "veh_snap"]
     assert set(tables) == set(expected_tables)
 
 
@@ -159,6 +159,31 @@ def test_labels_schema(temp_db):
         "stop_id": "TEXT",
         "label": "TEXT",
         "ts_labeled": "INTEGER",
+    }
+
+    for col, col_type in expected_columns.items():
+        assert col in columns, f"Missing column {col}"
+        assert columns[col] == col_type
+
+
+def test_arrivals_schema(temp_db):
+    """Test arrivals table has correct columns."""
+    initialize_db(temp_db)
+
+    conn = get_connection(temp_db)
+    cursor = conn.cursor()
+
+    cursor.execute("PRAGMA table_info(arrivals)")
+    columns = {row[1]: row[2] for row in cursor.fetchall()}
+    conn.close()
+
+    expected_columns = {
+        "trip_id": "TEXT",
+        "stop_id": "TEXT",
+        "actual_arrival_ts": "INTEGER",
+        "predicted_arrival_ts": "INTEGER",
+        "eta_error_min": "REAL",
+        "ts_recorded": "INTEGER",
     }
 
     for col, col_type in expected_columns.items():

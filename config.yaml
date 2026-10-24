@@ -10,7 +10,7 @@ feeds:
   mbta_v3: https://api-v3.mbta.com
 
 # Demo mode
-demo_stops: []              # fill with 3-4 stop_ids near Harvard i-lab / Northeastern
+demo_stops: ["64000", "23391", "334"]  # Nubian (routes 23,28,66), Back Bay (route 39), Ashmont (route 23)
 mock_dir: tests/fixtures/mock
 
 # Thresholds and tolerances
