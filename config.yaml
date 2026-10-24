@@ -1,11 +1,19 @@
+# Collection
 poll_seconds: 45            # never lower than 45
 routes: ["1", "23", "28", "39", "66", "111"]   # confirm route ids from the feed; swap quiet ones
-demo_stops: []              # fill with 3-4 stop_ids near Harvard i-lab / Northeastern
+
+# Feeds
 feeds:
   trip_updates: https://cdn.mbta.com/realtime/TripUpdates_enhanced.json
   vehicle_positions: https://cdn.mbta.com/realtime/VehiclePositions_enhanced.json
-  gbfs_discovery: ""        # Bluebikes gbfs.json from bluebikes.com/system-data (verify)
+  gbfs_discovery: https://gbfs.bluebikes.com/gbfs/gbfs.json
   mbta_v3: https://api-v3.mbta.com
+
+# Demo mode
+demo_stops: []              # fill with 3-4 stop_ids near Harvard i-lab / Northeastern
+mock_dir: tests/fixtures/mock
+
+# Thresholds and tolerances
 thresholds:
   stale_location_s: 120
   vanish_margin_s: 120
@@ -15,5 +23,7 @@ thresholds:
   min_vanished: 20
   drain_window_min: 20
   walk_m_per_min: 80
+
+# Replay
 replay:
   step_sec: 60

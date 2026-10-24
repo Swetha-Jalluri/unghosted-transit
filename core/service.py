@@ -1,6 +1,7 @@
 """Service layer for Unghosted contract."""
 import json
 import os
+import yaml
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -19,6 +20,13 @@ from core.contracts import (
     Evidence,
 )
 
+# Resolve paths relative to repo root (not current working directory)
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
+# Load config from repo root
+with open(REPO_ROOT / "config.yaml") as f:
+    CONFIG = yaml.safe_load(f)
+
 # Attribution and disclaimer (from product.md)
 ATTRIBUTION = [
     "Data: MBTA GTFS-realtime (MassDOT Developers License Agreement);",
@@ -26,8 +34,9 @@ ATTRIBUTION = [
 ]
 DISCLAIMER = "Unofficial. Not affiliated with or endorsed by MBTA, MassDOT or Bluebikes. For information only."
 
-# Mock data directory
-MOCK_DIR = Path("tests/fixtures/mock")
+# Mock data directory (from config.yaml, resolved relative to repo root)
+_mock_dir_config = CONFIG.get("mock_dir", "tests/fixtures/mock")
+MOCK_DIR = REPO_ROOT / _mock_dir_config
 
 
 def _load_json(filename: str) -> dict:
@@ -162,7 +171,7 @@ def get_replay_window() -> ReplayWindow:
     timeline = _load_json("replay_timeline.json")
     start_ts = timeline[0]["ts"]
     end_ts = timeline[-1]["ts"]
-    step_sec = 60  # from config.yaml
+    step_sec = CONFIG.get("replay", {}).get("step_sec", 60)
     n_snapshots = len(timeline)
 
     replay_window = ReplayWindow(

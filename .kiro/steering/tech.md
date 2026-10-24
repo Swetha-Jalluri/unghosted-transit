@@ -10,3 +10,9 @@ inclusion: always
 - Decision logic (status, reasons, chances, replay outcomes) must be pure deterministic functions with property-based tests (Hypothesis). These tests are our guardrails.
 - Run commands from the repo root: `uv run pytest -q`, `uv run streamlit run streamlit_app.py`, `uv run uvicorn api.main:app --reload`, `uv run python -m mcp_server.server`.
 - Keep spec documents concise: short acceptance criteria, no long test plans or diagrams.
+
+## No hardcoding
+- All URLs, routes, stop IDs, station IDs, thresholds and intervals come from config.yaml (or .env for secrets). Never hardcode them in code.
+- Mock data lives only in tests/fixtures/ and is used only as a fallback when real data is missing; never inside core logic.
+- No made-up numbers in code, docs or UI; findings come from logged data.
+- Test fixtures must be real snapshots from the live feeds (trimmed).
